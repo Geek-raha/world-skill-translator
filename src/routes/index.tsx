@@ -70,21 +70,27 @@ function LandingPage() {
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link
-                to="/onboarding"
+                to="/signup/youth"
                 className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold shadow-[var(--shadow-elevated)]"
                 style={{
                   background: "var(--gradient-ink)",
                   color: "var(--surface-ink-foreground)",
                 }}
               >
-                Start onboarding <ArrowRight className="h-4 w-4" />
+                Create youth account <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                to="/policymaker"
+                to="/signup/policymaker"
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-medium text-foreground hover:bg-muted"
               >
                 <BarChart3 className="h-4 w-4" />
-                Policymaker view
+                Policymaker access
+              </Link>
+              <Link
+                to="/auth"
+                className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+              >
+                Already have an account? Sign in
               </Link>
             </div>
           </div>
