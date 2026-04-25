@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, GraduationCap, Sparkles, Target, TrendingUp, Wallet } from "lucide-react";
+import { Briefcase, GraduationCap, Sparkles, Target, TrendingUp, Wallet, Lock } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { useActiveProfile } from "@/lib/profile-store";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
 import type { Opportunity } from "@/data/passport";
 
 export const Route = createFileRoute("/opportunities")({
@@ -38,6 +42,22 @@ const TYPE_ICON: Record<Opportunity["type"], typeof Briefcase> = {
 function OpportunitiesPage() {
   const { passport } = useActiveProfile();
   const [filter, setFilter] = useState<Opportunity["type"] | "All">("All");
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  function handleApply(o: Opportunity) {
+    if (loading) return;
+    if (!user) {
+      toast.info("Sign in to apply", {
+        description: "Create an account or sign in to apply for opportunities.",
+      });
+      navigate({ to: "/auth" });
+      return;
+    }
+    toast.success("Application started", {
+      description: `Your interest in “${o.title}” at ${o.employer} has been recorded.`,
+    });
+  }
 
   const visible = useMemo(
     () =>
@@ -182,6 +202,23 @@ function OpportunitiesPage() {
                     </div>
                   </div>
                 )}
+
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  {!user && !loading && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                      <Lock className="h-3 w-3" />
+                      Sign in required
+                    </p>
+                  )}
+                  <Button
+                    onClick={() => handleApply(o)}
+                    disabled={loading}
+                    size="sm"
+                    className="ml-auto rounded-full"
+                  >
+                    {user ? "Apply now" : "Sign in to apply"}
+                  </Button>
+                </div>
               </motion.article>
             );
           })}
