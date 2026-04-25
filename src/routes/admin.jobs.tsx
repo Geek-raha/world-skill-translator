@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Briefcase, Plus, Shield, Trash2 } from "lucide-react";
+import { Briefcase, Pencil, Plus, Save, Shield, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin/jobs")({
@@ -52,6 +52,10 @@ function JobsPage() {
   const [jContact, setJContact] = useState("");
   const [jDescription, setJDescription] = useState("");
   const [savingJob, setSavingJob] = useState(false);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [edit, setEdit] = useState<Partial<AdminJob>>({});
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const load = useCallback(async () => {
     const [{ data: countryRows }, { data: jobRows }] = await Promise.all([
@@ -117,6 +121,61 @@ function JobsPage() {
       return;
     }
     toast.success("Job removed");
+    load();
+  }
+
+  function startEdit(j: AdminJob) {
+    setEditingId(j.id);
+    setEdit({
+      category: j.category,
+      title: j.title,
+      company: j.company,
+      city: j.city,
+      country: j.country,
+      wage_range: j.wage_range,
+      employer_contact: j.employer_contact,
+      description: j.description ?? "",
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEdit({});
+  }
+
+  async function saveEdit(id: string) {
+    if (
+      !edit.title?.toString().trim() ||
+      !edit.company?.toString().trim() ||
+      !edit.city?.toString().trim() ||
+      !edit.country ||
+      !edit.wage_range?.toString().trim() ||
+      !edit.employer_contact?.toString().trim()
+    ) {
+      toast.error("Please fill every required field");
+      return;
+    }
+    setSavingEdit(true);
+    const { error } = await supabase
+      .from("admin_jobs")
+      .update({
+        category: edit.category,
+        title: edit.title!.toString().trim(),
+        company: edit.company!.toString().trim(),
+        city: edit.city!.toString().trim(),
+        country: edit.country,
+        wage_range: edit.wage_range!.toString().trim(),
+        employer_contact: edit.employer_contact!.toString().trim(),
+        description: edit.description?.toString().trim() || null,
+      })
+      .eq("id", id);
+    setSavingEdit(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Job updated");
+    cancelEdit();
     load();
   }
 
@@ -224,25 +283,110 @@ function JobsPage() {
         ) : (
           <ul className="mt-3 divide-y divide-border">
             {jobs.map((j) => (
-              <li key={j.id} className="flex items-start justify-between gap-3 py-3">
-                <div className="min-w-0">
-                  <p className="font-display text-sm font-semibold leading-snug">{j.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {j.company} · {j.city}, {j.country}
-                  </p>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                    <span className="rounded-full bg-muted px-2 py-0.5">{j.category}</span>
-                    <span>· {j.wage_range}</span>
-                    <span>· {j.employer_contact}</span>
+              <li key={j.id} className="py-3">
+                {editingId === j.id ? (
+                  <div className="grid gap-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <select
+                        value={edit.category as string}
+                        onChange={(e) => setEdit((s) => ({ ...s, category: e.target.value }))}
+                        className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                      >
+                        {JOB_CATEGORIES.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={edit.country as string}
+                        onChange={(e) => setEdit((s) => ({ ...s, country: e.target.value }))}
+                        className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                      >
+                        <option value="">Select country…</option>
+                        {countries.map((c) => (
+                          <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <input
+                      value={(edit.title as string) ?? ""}
+                      onChange={(e) => setEdit((s) => ({ ...s, title: e.target.value }))}
+                      placeholder="Job title"
+                      className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                    />
+                    <input
+                      value={(edit.company as string) ?? ""}
+                      onChange={(e) => setEdit((s) => ({ ...s, company: e.target.value }))}
+                      placeholder="Company hiring"
+                      className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        value={(edit.city as string) ?? ""}
+                        onChange={(e) => setEdit((s) => ({ ...s, city: e.target.value }))}
+                        placeholder="City"
+                        className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                      />
+                      <input
+                        value={(edit.wage_range as string) ?? ""}
+                        onChange={(e) => setEdit((s) => ({ ...s, wage_range: e.target.value }))}
+                        placeholder="Wage range"
+                        className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                      />
+                    </div>
+                    <input
+                      value={(edit.employer_contact as string) ?? ""}
+                      onChange={(e) => setEdit((s) => ({ ...s, employer_contact: e.target.value }))}
+                      placeholder="Employer ID or email"
+                      className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                    />
+                    <textarea
+                      value={(edit.description as string) ?? ""}
+                      onChange={(e) => setEdit((s) => ({ ...s, description: e.target.value }))}
+                      placeholder="Short description (optional)"
+                      rows={2}
+                      className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button type="button" variant="outline" size="sm" onClick={cancelEdit} className="rounded-full">
+                        <X className="mr-1 h-3.5 w-3.5" /> Cancel
+                      </Button>
+                      <Button type="button" size="sm" disabled={savingEdit} onClick={() => saveEdit(j.id)} className="rounded-full">
+                        <Save className="mr-1 h-3.5 w-3.5" />
+                        {savingEdit ? "Saving…" : "Save changes"}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <button
-                  onClick={() => deleteJob(j.id, j.title)}
-                  aria-label={`Remove ${j.title}`}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                ) : (
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-display text-sm font-semibold leading-snug">{j.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {j.company} · {j.city}, {j.country}
+                      </p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                        <span className="rounded-full bg-muted px-2 py-0.5">{j.category}</span>
+                        <span>· {j.wage_range}</span>
+                        <span>· {j.employer_contact}</span>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        onClick={() => startEdit(j)}
+                        aria-label={`Edit ${j.title}`}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => deleteJob(j.id, j.title)}
+                        aria-label={`Remove ${j.title}`}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
