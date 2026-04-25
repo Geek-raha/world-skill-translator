@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, Check, GraduationCap, Sparkles, Target, TrendingUp, Wallet, Lock } from "lucide-react";
+import { Briefcase, Check, GraduationCap, MapPin, Sparkles, Target, TrendingUp, Wallet, Lock, Mail } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useActiveProfile } from "@/lib/profile-store";
@@ -9,6 +9,19 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import type { Opportunity } from "@/data/passport";
+
+interface AdminJob {
+  id: string;
+  category: string;
+  title: string;
+  company: string;
+  city: string;
+  country: string;
+  wage_range: string;
+  employer_contact: string;
+  description: string | null;
+  created_at: string;
+}
 
 export const Route = createFileRoute("/opportunities")({
   head: () => ({
@@ -43,10 +56,13 @@ const TYPE_ICON: Record<Opportunity["type"], typeof Briefcase> = {
 function OpportunitiesPage() {
   const { passport } = useActiveProfile();
   const [filter, setFilter] = useState<Opportunity["type"] | "All">("All");
-  const { user, loading } = useAuth();
+  const { user, loading, hasRole } = useAuth();
+  const isAdmin = hasRole("admin");
   const navigate = useNavigate();
   const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
   const [submittingId, setSubmittingId] = useState<string | null>(null);
+  const [adminJobs, setAdminJobs] = useState<AdminJob[]>([]);
+  const [countryFilter, setCountryFilter] = useState<string>("All");
 
   useEffect(() => {
     if (!user) {
@@ -59,6 +75,21 @@ function OpportunitiesPage() {
       .eq("user_id", user.id)
       .then(({ data }) => {
         if (data) setAppliedIds(new Set(data.map((r) => r.opportunity_id)));
+      });
+  }, [user]);
+
+  // Load admin-posted jobs (visible to all signed-in users)
+  useEffect(() => {
+    if (!user) {
+      setAdminJobs([]);
+      return;
+    }
+    supabase
+      .from("admin_jobs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setAdminJobs(data as AdminJob[]);
       });
   }, [user]);
 
@@ -91,26 +122,66 @@ function OpportunitiesPage() {
     });
   }
 
+  async function handleApplyAdminJob(j: AdminJob) {
+    if (loading) return;
+    if (!user) {
+      toast.info("Sign in to apply", { description: "Create an account or sign in to apply." });
+      navigate({ to: "/auth" });
+      return;
+    }
+    const oid = `admin-${j.id}`;
+    if (appliedIds.has(oid)) return;
+    setSubmittingId(oid);
+    const { error } = await supabase.from("applications").insert({
+      user_id: user.id,
+      opportunity_id: oid,
+      opportunity_title: j.title,
+      employer: j.company,
+      opportunity_type: j.category,
+    });
+    setSubmittingId(null);
+    if (error) {
+      toast.error("Could not submit application", { description: error.message });
+      return;
+    }
+    setAppliedIds((s) => new Set(s).add(oid));
+    toast.success("Application submitted", {
+      description: `“${j.title}” at ${j.company} added to your account.`,
+    });
+  }
+
   const visible = useMemo(
     () =>
       passport.opportunities
         .filter((o) => filter === "All" || o.type === filter)
-        .sort((a, b) => b.matchScore - a.matchScore),
-    [filter, passport.opportunities]
+        .sort((a, b) => (isAdmin ? 0 : b.matchScore - a.matchScore)),
+    [filter, passport.opportunities, isAdmin]
+  );
+
+  const visibleAdminJobs = useMemo(() => {
+    return adminJobs
+      .filter((j) => countryFilter === "All" || j.country === countryFilter)
+      .filter((j) => filter === "All" || j.category === filter);
+  }, [adminJobs, countryFilter, filter]);
+
+  const countries = useMemo(
+    () => Array.from(new Set(adminJobs.map((j) => j.country))).sort(),
+    [adminJobs]
   );
 
   return (
     <main className="pb-20">
       <div className="mx-auto max-w-5xl px-4 pt-8 sm:px-6 sm:pt-12">
         <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          Module 03 · Opportunity matching
+          {isAdmin ? "Admin · All opportunities" : "Module 03 · Opportunity matching"}
         </p>
         <h1 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-          Grounded, not aspirational.
+          {isAdmin ? "Every opportunity, all countries." : "Grounded, not aspirational."}
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-          Every card shows wage range, sector growth, and how attainable it really is for you
-          in {passport.country}.
+          {isAdmin
+            ? "Browse every posted opportunity across all countries. Use filters to narrow by type or country."
+            : `Every card shows wage range, sector growth, and how attainable it really is for you in ${passport.country}.`}
         </p>
 
         {/* Filter chips */}
@@ -134,8 +205,108 @@ function OpportunitiesPage() {
           })}
         </div>
 
-        {/* Cards */}
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
+        {isAdmin && countries.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Country
+            </span>
+            {(["All", ...countries]).map((c) => {
+              const active = countryFilter === c;
+              return (
+                <button
+                  key={c}
+                  onClick={() => setCountryFilter(c)}
+                  className="rounded-full border px-3 py-1 text-[11px] font-medium transition-colors"
+                  style={{
+                    background: active ? "var(--surface-ink)" : "var(--card)",
+                    color: active ? "var(--surface-ink-foreground)" : "var(--muted-foreground)",
+                    borderColor: active ? "var(--surface-ink)" : "var(--border)",
+                  }}
+                >
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Admin-posted jobs */}
+        {visibleAdminJobs.length > 0 && (
+          <>
+            <h2 className="mt-8 font-display text-lg font-semibold tracking-tight">
+              Posted opportunities
+            </h2>
+            <div className="mt-3 grid gap-4 md:grid-cols-2">
+              {visibleAdminJobs.map((j, i) => {
+                const oid = `admin-${j.id}`;
+                const applied = appliedIds.has(oid);
+                return (
+                  <motion.article
+                    key={j.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="flex flex-col rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          {j.category}
+                        </p>
+                        <h3 className="font-display text-base font-semibold leading-tight">
+                          {j.title}
+                        </h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{j.company}</p>
+                      </div>
+                    </div>
+                    <p className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                      <MapPin className="h-3 w-3" /> {j.city}, {j.country}
+                    </p>
+                    <div className="mt-3 rounded-2xl bg-muted/60 px-4 py-3">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                        Wage range
+                      </p>
+                      <p className="font-display text-base font-semibold">{j.wage_range}</p>
+                    </div>
+                    {j.description && (
+                      <p className="mt-3 text-xs leading-snug text-muted-foreground">{j.description}</p>
+                    )}
+                    <p className="mt-3 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Mail className="h-3 w-3" /> {j.employer_contact}
+                    </p>
+                    {!isAdmin && (
+                      <div className="mt-4 flex items-center justify-end">
+                        <Button
+                          onClick={() => handleApplyAdminJob(j)}
+                          disabled={loading || submittingId === oid || applied}
+                          size="sm"
+                          className="rounded-full"
+                          variant={applied ? "secondary" : "default"}
+                        >
+                          {applied ? (
+                            <><Check className="mr-1 h-3.5 w-3.5" /> Applied</>
+                          ) : user ? (
+                            submittingId === oid ? "Submitting…" : "Apply now"
+                          ) : (
+                            "Sign in to apply"
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </motion.article>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* Demo cards */}
+        {!isAdmin && (
+          <h2 className="mt-8 font-display text-lg font-semibold tracking-tight">
+            Matched for you
+          </h2>
+        )}
+        <div className="mt-3 grid gap-4 md:grid-cols-2">
           {visible.map((o, i) => {
             const Icon = TYPE_ICON[o.type];
             const reach = REACH_TONE[o.reach];
@@ -164,12 +335,14 @@ function OpportunitiesPage() {
                       </h3>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                      Match
-                    </p>
-                    <p className="font-display text-xl font-semibold">{o.matchScore}</p>
-                  </div>
+                  {!isAdmin && (
+                    <div className="text-right">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                        Match
+                      </p>
+                      <p className="font-display text-xl font-semibold">{o.matchScore}</p>
+                    </div>
+                  )}
                 </div>
 
                 <p className="mt-2 text-sm text-muted-foreground">{o.employer}</p>
@@ -235,35 +408,37 @@ function OpportunitiesPage() {
                   </div>
                 )}
 
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  {!user && !loading && (
-                    <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      <Lock className="h-3 w-3" />
-                      Sign in required
-                    </p>
-                  )}
-                  <Button
-                    onClick={() => handleApply(o)}
-                    disabled={loading || submittingId === o.id || appliedIds.has(o.id)}
-                    size="sm"
-                    className="ml-auto rounded-full"
-                    variant={appliedIds.has(o.id) ? "secondary" : "default"}
-                  >
-                    {appliedIds.has(o.id) ? (
-                      <><Check className="mr-1 h-3.5 w-3.5" /> Applied</>
-                    ) : user ? (
-                      submittingId === o.id ? "Submitting…" : "Apply now"
-                    ) : (
-                      "Sign in to apply"
+                {!isAdmin && (
+                  <div className="mt-4 flex items-center justify-between gap-3">
+                    {!user && !loading && (
+                      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <Lock className="h-3 w-3" />
+                        Sign in required
+                      </p>
                     )}
-                  </Button>
-                </div>
+                    <Button
+                      onClick={() => handleApply(o)}
+                      disabled={loading || submittingId === o.id || appliedIds.has(o.id)}
+                      size="sm"
+                      className="ml-auto rounded-full"
+                      variant={appliedIds.has(o.id) ? "secondary" : "default"}
+                    >
+                      {appliedIds.has(o.id) ? (
+                        <><Check className="mr-1 h-3.5 w-3.5" /> Applied</>
+                      ) : user ? (
+                        submittingId === o.id ? "Submitting…" : "Apply now"
+                      ) : (
+                        "Sign in to apply"
+                      )}
+                    </Button>
+                  </div>
+                )}
               </motion.article>
             );
           })}
         </div>
 
-        {visible.length === 0 && (
+        {visible.length === 0 && visibleAdminJobs.length === 0 && (
           <p className="mt-12 text-center text-sm text-muted-foreground">
             No opportunities of this type for your profile yet.
           </p>
