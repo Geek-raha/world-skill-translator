@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Download, Filter, Users } from "lucide-react";
 import {
@@ -8,6 +9,7 @@ import {
   type Region,
 } from "@/data/passport";
 import { loadActiveRegion } from "@/lib/profile-store";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/policymaker")({
   head: () => ({
@@ -24,11 +26,54 @@ export const Route = createFileRoute("/policymaker")({
 });
 
 function PolicymakerPage() {
+  const { user, profile, hasRole, loading } = useAuth();
+  const navigate = useNavigate();
   const [region, setRegion] = useState<Region>("Sub-Saharan Africa");
   const [gender, setGender] = useState<"All" | "Women" | "Men">("All");
   const [education, setEducation] = useState("All");
 
   useEffect(() => setRegion(loadActiveRegion()), []);
+
+  // Auth gate: must be admin OR approved policymaker
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center text-sm text-muted-foreground">
+        Loading…
+      </div>
+    );
+  }
+  if (!user) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-20 text-center">
+        <h1 className="font-display text-2xl font-semibold">Sign-in required</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The policymaker dashboard is restricted to approved institutional accounts.
+        </p>
+        <div className="mt-5 flex justify-center gap-2">
+          <Link to="/auth" className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background">Sign in</Link>
+          <Link to="/signup/policymaker" className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted">Apply</Link>
+        </div>
+      </div>
+    );
+  }
+  if (profile?.status === "pending") {
+    navigate({ to: "/pending" });
+    return null;
+  }
+  if (!hasRole("admin") && !hasRole("policymaker")) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-20 text-center">
+        <h1 className="font-display text-2xl font-semibold">Access restricted</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          This dashboard is for approved policymakers. Apply for access if your institution
+          uses the Digital Skill Passport.
+        </p>
+        <Link to="/signup/policymaker" className="mt-5 inline-block rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background">
+          Apply for access
+        </Link>
+      </div>
+    );
+  }
 
   const data = AGGREGATE_SUPPLY_DEMAND[region];
   const econ = REGION_ECONOMETRICS[region];

@@ -1,8 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, Shield, User as UserIcon } from "lucide-react";
 import { loadActiveRegion } from "@/lib/profile-store";
 import type { Region } from "@/data/passport";
+import { useAuth } from "@/hooks/use-auth";
 
 const NAV = [
   { to: "/onboarding", label: "Onboarding" },
@@ -17,6 +18,7 @@ export function AppHeader() {
   const { location } = useRouterState();
   const [open, setOpen] = useState(false);
   const [region, setRegion] = useState<Region>("Sub-Saharan Africa");
+  const { user, profile, hasRole, signOut } = useAuth();
 
   useEffect(() => {
     setRegion(loadActiveRegion());
@@ -70,15 +72,50 @@ export function AppHeader() {
               {item.label}
             </Link>
           ))}
+          {hasRole("admin") ? (
+            <Link
+              to="/admin"
+              className="rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              activeProps={{
+                className:
+                  "rounded-full px-3 py-1.5 text-xs font-semibold text-foreground bg-muted",
+              }}
+            >
+              <span className="inline-flex items-center gap-1"><Shield className="h-3 w-3" /> Admin</span>
+            </Link>
+          ) : null}
         </nav>
 
-        <button
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground lg:hidden"
-        >
-          {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </button>
+        <div className="flex items-center gap-2">
+          {user ? (
+            <div className="hidden items-center gap-2 lg:flex">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs">
+                <UserIcon className="h-3 w-3" />
+                {profile?.display_name ?? user.email}
+              </span>
+              <button
+                onClick={() => signOut()}
+                className="inline-flex h-8 items-center gap-1 rounded-full border border-border px-3 text-xs font-medium hover:bg-muted"
+              >
+                <LogOut className="h-3 w-3" /> Sign out
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/auth"
+              className="hidden rounded-full bg-foreground px-3 py-1.5 text-xs font-medium text-background hover:opacity-90 lg:inline-flex"
+            >
+              Sign in
+            </Link>
+          )}
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Toggle menu"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground lg:hidden"
+          >
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -97,6 +134,25 @@ export function AppHeader() {
                 {item.label}
               </Link>
             ))}
+            {hasRole("admin") ? (
+              <Link to="/admin" className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
+                Admin
+              </Link>
+            ) : null}
+            <div className="mt-2 border-t border-border pt-2">
+              {user ? (
+                <button
+                  onClick={() => signOut()}
+                  className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  Sign out ({profile?.display_name ?? user.email})
+                </button>
+              ) : (
+                <Link to="/auth" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted">
+                  Sign in
+                </Link>
+              )}
+            </div>
           </nav>
         </div>
       )}
