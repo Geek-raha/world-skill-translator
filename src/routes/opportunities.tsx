@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, GraduationCap, Sparkles, Target, TrendingUp, Wallet, Lock } from "lucide-react";
+import { Briefcase, Check, GraduationCap, Sparkles, Target, TrendingUp, Wallet, Lock } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useActiveProfile } from "@/lib/profile-store";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import type { Opportunity } from "@/data/passport";
 
@@ -44,8 +45,24 @@ function OpportunitiesPage() {
   const [filter, setFilter] = useState<Opportunity["type"] | "All">("All");
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
 
-  function handleApply(o: Opportunity) {
+  useEffect(() => {
+    if (!user) {
+      setAppliedIds(new Set());
+      return;
+    }
+    supabase
+      .from("applications")
+      .select("opportunity_id")
+      .eq("user_id", user.id)
+      .then(({ data }) => {
+        if (data) setAppliedIds(new Set(data.map((r) => r.opportunity_id)));
+      });
+  }, [user]);
+
+  async function handleApply(o: Opportunity) {
     if (loading) return;
     if (!user) {
       toast.info("Sign in to apply", {
@@ -54,8 +71,23 @@ function OpportunitiesPage() {
       navigate({ to: "/auth" });
       return;
     }
-    toast.success("Application started", {
-      description: `Your interest in “${o.title}” at ${o.employer} has been recorded.`,
+    if (appliedIds.has(o.id)) return;
+    setSubmittingId(o.id);
+    const { error } = await supabase.from("applications").insert({
+      user_id: user.id,
+      opportunity_id: o.id,
+      opportunity_title: o.title,
+      employer: o.employer,
+      opportunity_type: o.type,
+    });
+    setSubmittingId(null);
+    if (error) {
+      toast.error("Could not submit application", { description: error.message });
+      return;
+    }
+    setAppliedIds((s) => new Set(s).add(o.id));
+    toast.success("Application submitted", {
+      description: `“${o.title}” at ${o.employer} added to your account.`,
     });
   }
 
@@ -212,11 +244,18 @@ function OpportunitiesPage() {
                   )}
                   <Button
                     onClick={() => handleApply(o)}
-                    disabled={loading}
+                    disabled={loading || submittingId === o.id || appliedIds.has(o.id)}
                     size="sm"
                     className="ml-auto rounded-full"
+                    variant={appliedIds.has(o.id) ? "secondary" : "default"}
                   >
-                    {user ? "Apply now" : "Sign in to apply"}
+                    {appliedIds.has(o.id) ? (
+                      <><Check className="mr-1 h-3.5 w-3.5" /> Applied</>
+                    ) : user ? (
+                      submittingId === o.id ? "Submitting…" : "Apply now"
+                    ) : (
+                      "Sign in to apply"
+                    )}
                   </Button>
                 </div>
               </motion.article>
