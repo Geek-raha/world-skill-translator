@@ -72,11 +72,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  const isOnboarding =
-    typeof window !== "undefined" && window.location.pathname.startsWith("/onboarding");
   return (
     <div className="min-h-screen" style={{ background: "var(--gradient-paper)" }}>
-      {!isOnboarding && <AppHeader />}
+      <AppHeader />
       <Outlet />
     </div>
   );
