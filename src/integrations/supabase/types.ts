@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_jobs: {
+        Row: {
+          category: string
+          city: string
+          company: string
+          country: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          employer_contact: string
+          id: string
+          title: string
+          wage_range: string
+        }
+        Insert: {
+          category: string
+          city: string
+          company: string
+          country: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          employer_contact: string
+          id?: string
+          title: string
+          wage_range: string
+        }
+        Update: {
+          category?: string
+          city?: string
+          company?: string
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          employer_contact?: string
+          id?: string
+          title?: string
+          wage_range?: string
+        }
+        Relationships: []
+      }
       applications: {
         Row: {
           created_at: string
@@ -41,6 +83,33 @@ export type Database = {
           opportunity_title?: string
           opportunity_type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      countries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          iso_code: string | null
+          name: string
+          region: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          iso_code?: string | null
+          name: string
+          region?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          iso_code?: string | null
+          name?: string
+          region?: string | null
         }
         Relationships: []
       }

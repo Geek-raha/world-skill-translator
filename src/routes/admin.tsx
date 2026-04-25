@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { useAuth, type Profile } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,9 +87,23 @@ function AdminPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-2 flex items-center gap-3">
         <Shield className="h-5 w-5" />
         <h1 className="font-display text-2xl font-semibold tracking-tight">Admin · Accounts</h1>
+      </div>
+      <div className="mb-6 flex gap-2">
+        <Link
+          to="/admin"
+          className="rounded-full bg-foreground px-4 py-1.5 text-xs font-medium text-background"
+        >
+          Accounts
+        </Link>
+        <Link
+          to="/admin/manage"
+          className="rounded-full border border-border px-4 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
+        >
+          Jobs & countries
+        </Link>
       </div>
       <div className="mb-4 flex gap-2">
         {(["pending", "all"] as const).map((t) => (

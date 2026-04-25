@@ -23,6 +23,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignupYouthRouteImport } from './routes/signup.youth'
 import { Route as SignupPolicymakerRouteImport } from './routes/signup.policymaker'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as AdminManageRouteImport } from './routes/admin.manage'
 
 const ReadinessRoute = ReadinessRouteImport.update({
   id: '/readiness',
@@ -94,11 +95,16 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/callback',
   getParentRoute: () => AuthRoute,
 } as any)
+const AdminManageRoute = AdminManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/config': typeof ConfigRoute
   '/onboarding': typeof OnboardingRoute
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/policymaker': typeof PolicymakerRoute
   '/profile': typeof ProfileRoute
   '/readiness': typeof ReadinessRoute
+  '/admin/manage': typeof AdminManageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/signup/policymaker': typeof SignupPolicymakerRoute
   '/signup/youth': typeof SignupYouthRoute
@@ -114,7 +121,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/config': typeof ConfigRoute
   '/onboarding': typeof OnboardingRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/policymaker': typeof PolicymakerRoute
   '/profile': typeof ProfileRoute
   '/readiness': typeof ReadinessRoute
+  '/admin/manage': typeof AdminManageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/signup/policymaker': typeof SignupPolicymakerRoute
   '/signup/youth': typeof SignupYouthRoute
@@ -131,7 +139,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/config': typeof ConfigRoute
   '/onboarding': typeof OnboardingRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/policymaker': typeof PolicymakerRoute
   '/profile': typeof ProfileRoute
   '/readiness': typeof ReadinessRoute
+  '/admin/manage': typeof AdminManageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/signup/policymaker': typeof SignupPolicymakerRoute
   '/signup/youth': typeof SignupYouthRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/policymaker'
     | '/profile'
     | '/readiness'
+    | '/admin/manage'
     | '/auth/callback'
     | '/signup/policymaker'
     | '/signup/youth'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/policymaker'
     | '/profile'
     | '/readiness'
+    | '/admin/manage'
     | '/auth/callback'
     | '/signup/policymaker'
     | '/signup/youth'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/policymaker'
     | '/profile'
     | '/readiness'
+    | '/admin/manage'
     | '/auth/callback'
     | '/signup/policymaker'
     | '/signup/youth'
@@ -198,7 +210,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   ConfigRoute: typeof ConfigRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -311,8 +323,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/admin/manage': {
+      id: '/admin/manage'
+      path: '/manage'
+      fullPath: '/admin/manage'
+      preLoaderRoute: typeof AdminManageRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminManageRoute: typeof AdminManageRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminManageRoute: AdminManageRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AuthRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
@@ -327,7 +356,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   ConfigRoute: ConfigRoute,
   OnboardingRoute: OnboardingRoute,
