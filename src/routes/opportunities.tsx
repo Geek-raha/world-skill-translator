@@ -51,7 +51,7 @@ function OpportunitiesPage() {
       toast.info("Sign in to apply", {
         description: "Create an account or sign in to apply for opportunities.",
       });
-      navigate({ to: "/auth", search: { redirect: "/opportunities" } as never });
+      navigate({ to: "/auth" });
       return;
     }
     toast.success("Application started", {
