@@ -9,12 +9,42 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReadinessRouteImport } from './routes/readiness'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PolicymakerRouteImport } from './routes/policymaker'
+import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ConfigRouteImport } from './routes/config'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ReadinessRoute = ReadinessRouteImport.update({
+  id: '/readiness',
+  path: '/readiness',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PolicymakerRoute = PolicymakerRouteImport.update({
+  id: '/policymaker',
+  path: '/policymaker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpportunitiesRoute = OpportunitiesRouteImport.update({
+  id: '/opportunities',
+  path: '/opportunities',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfigRoute = ConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,37 +55,114 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/config': typeof ConfigRoute
   '/onboarding': typeof OnboardingRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/policymaker': typeof PolicymakerRoute
+  '/profile': typeof ProfileRoute
+  '/readiness': typeof ReadinessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/config': typeof ConfigRoute
   '/onboarding': typeof OnboardingRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/policymaker': typeof PolicymakerRoute
+  '/profile': typeof ProfileRoute
+  '/readiness': typeof ReadinessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/config': typeof ConfigRoute
   '/onboarding': typeof OnboardingRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/policymaker': typeof PolicymakerRoute
+  '/profile': typeof ProfileRoute
+  '/readiness': typeof ReadinessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/onboarding'
+  fullPaths:
+    | '/'
+    | '/config'
+    | '/onboarding'
+    | '/opportunities'
+    | '/policymaker'
+    | '/profile'
+    | '/readiness'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/onboarding'
-  id: '__root__' | '/' | '/onboarding'
+  to:
+    | '/'
+    | '/config'
+    | '/onboarding'
+    | '/opportunities'
+    | '/policymaker'
+    | '/profile'
+    | '/readiness'
+  id:
+    | '__root__'
+    | '/'
+    | '/config'
+    | '/onboarding'
+    | '/opportunities'
+    | '/policymaker'
+    | '/profile'
+    | '/readiness'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConfigRoute: typeof ConfigRoute
   OnboardingRoute: typeof OnboardingRoute
+  OpportunitiesRoute: typeof OpportunitiesRoute
+  PolicymakerRoute: typeof PolicymakerRoute
+  ProfileRoute: typeof ProfileRoute
+  ReadinessRoute: typeof ReadinessRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/readiness': {
+      id: '/readiness'
+      path: '/readiness'
+      fullPath: '/readiness'
+      preLoaderRoute: typeof ReadinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policymaker': {
+      id: '/policymaker'
+      path: '/policymaker'
+      fullPath: '/policymaker'
+      preLoaderRoute: typeof PolicymakerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/opportunities': {
+      id: '/opportunities'
+      path: '/opportunities'
+      fullPath: '/opportunities'
+      preLoaderRoute: typeof OpportunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/config': {
+      id: '/config'
+      path: '/config'
+      fullPath: '/config'
+      preLoaderRoute: typeof ConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,7 +177,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConfigRoute: ConfigRoute,
   OnboardingRoute: OnboardingRoute,
+  OpportunitiesRoute: OpportunitiesRoute,
+  PolicymakerRoute: PolicymakerRoute,
+  ProfileRoute: ProfileRoute,
+  ReadinessRoute: ReadinessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
