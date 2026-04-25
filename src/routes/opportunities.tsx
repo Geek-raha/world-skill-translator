@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, Check, GraduationCap, MapPin, Sparkles, Target, TrendingUp, Wallet, Lock, Mail } from "lucide-react";
+import { Briefcase, Check, GraduationCap, MapPin, Plus, Sparkles, Target, TrendingUp, Wallet, Lock, Mail } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useActiveProfile } from "@/lib/profile-store";
@@ -184,6 +184,17 @@ function OpportunitiesPage() {
             : `Every card shows wage range, sector growth, and how attainable it really is for you in ${passport.country}.`}
         </p>
 
+        {isAdmin && (
+          <div className="mt-5">
+            <Link
+              to="/admin/jobs"
+              className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-xs font-medium text-background hover:opacity-90"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add opportunity
+            </Link>
+          </div>
+        )}
+
         {/* Filter chips */}
         <div className="mt-6 flex flex-wrap gap-2">
           {(["All", ...TYPES] as const).map((t) => {
@@ -300,14 +311,14 @@ function OpportunitiesPage() {
           </>
         )}
 
-        {/* Demo cards */}
+        {/* Demo / matched cards — hidden for admins (no matching content) */}
         {!isAdmin && (
-          <h2 className="mt-8 font-display text-lg font-semibold tracking-tight">
-            Matched for you
-          </h2>
-        )}
-        <div className="mt-3 grid gap-4 md:grid-cols-2">
-          {visible.map((o, i) => {
+          <>
+            <h2 className="mt-8 font-display text-lg font-semibold tracking-tight">
+              Matched for you
+            </h2>
+            <div className="mt-3 grid gap-4 md:grid-cols-2">
+              {visible.map((o, i) => {
             const Icon = TYPE_ICON[o.type];
             const reach = REACH_TONE[o.reach];
             return (
@@ -335,14 +346,12 @@ function OpportunitiesPage() {
                       </h3>
                     </div>
                   </div>
-                  {!isAdmin && (
-                    <div className="text-right">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                        Match
-                      </p>
-                      <p className="font-display text-xl font-semibold">{o.matchScore}</p>
-                    </div>
-                  )}
+                  <div className="text-right">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      Match
+                    </p>
+                    <p className="font-display text-xl font-semibold">{o.matchScore}</p>
+                  </div>
                 </div>
 
                 <p className="mt-2 text-sm text-muted-foreground">{o.employer}</p>
@@ -408,8 +417,7 @@ function OpportunitiesPage() {
                   </div>
                 )}
 
-                {!isAdmin && (
-                  <div className="mt-4 flex items-center justify-between gap-3">
+                <div className="mt-4 flex items-center justify-between gap-3">
                     {!user && !loading && (
                       <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                         <Lock className="h-3 w-3" />
@@ -431,14 +439,15 @@ function OpportunitiesPage() {
                         "Sign in to apply"
                       )}
                     </Button>
-                  </div>
-                )}
+                </div>
               </motion.article>
             );
-          })}
-        </div>
+              })}
+            </div>
+          </>
+        )}
 
-        {visible.length === 0 && visibleAdminJobs.length === 0 && (
+        {((isAdmin && visibleAdminJobs.length === 0) || (!isAdmin && visible.length === 0 && visibleAdminJobs.length === 0)) && (
           <p className="mt-12 text-center text-sm text-muted-foreground">
             No opportunities of this type for your profile yet.
           </p>

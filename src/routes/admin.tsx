@@ -99,10 +99,16 @@ function AdminPage() {
           Accounts
         </Link>
         <Link
-          to="/admin/manage"
+          to="/admin/jobs"
           className="rounded-full border border-border px-4 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
         >
-          Jobs & countries
+          Jobs
+        </Link>
+        <Link
+          to="/admin/countries"
+          className="rounded-full border border-border px-4 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
+        >
+          Countries
         </Link>
       </div>
       <div className="mb-4 flex gap-2">
