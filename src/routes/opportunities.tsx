@@ -78,12 +78,8 @@ function OpportunitiesPage() {
       });
   }, [user]);
 
-  // Load admin-posted jobs (visible to all signed-in users)
+  // Load admin-posted jobs (visible to everyone, including signed-out visitors)
   useEffect(() => {
-    if (!user) {
-      setAdminJobs([]);
-      return;
-    }
     supabase
       .from("admin_jobs")
       .select("*")
@@ -91,7 +87,7 @@ function OpportunitiesPage() {
       .then(({ data }) => {
         if (data) setAdminJobs(data as AdminJob[]);
       });
-  }, [user]);
+  }, []);
 
   async function handleApply(o: Opportunity) {
     if (loading) return;
@@ -311,8 +307,8 @@ function OpportunitiesPage() {
           </>
         )}
 
-        {/* Demo / matched cards — hidden for admins (no matching content) */}
-        {!isAdmin && (
+        {/* Demo / matched cards — hidden for admins and signed-out visitors */}
+        {!isAdmin && user && (
           <>
             <h2 className="mt-8 font-display text-lg font-semibold tracking-tight">
               Matched for you
