@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Menu, X, LogOut, Shield, User as UserIcon } from "lucide-react";
+import { Menu, X, LogOut, Shield, User as UserIcon, UserCircle } from "lucide-react";
 import { loadActiveRegion } from "@/lib/profile-store";
 import type { Region } from "@/data/passport";
 import { useAuth } from "@/hooks/use-auth";
@@ -89,10 +89,13 @@ export function AppHeader() {
         <div className="flex items-center gap-2">
           {user ? (
             <div className="hidden items-center gap-2 lg:flex">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs">
+              <Link
+                to="/account"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs hover:bg-muted"
+              >
                 <UserIcon className="h-3 w-3" />
                 {profile?.display_name ?? user.email}
-              </span>
+              </Link>
               <button
                 onClick={() => signOut()}
                 className="inline-flex h-8 items-center gap-1 rounded-full border border-border px-3 text-xs font-medium hover:bg-muted"
@@ -141,12 +144,20 @@ export function AppHeader() {
             ) : null}
             <div className="mt-2 border-t border-border pt-2">
               {user ? (
-                <button
-                  onClick={() => signOut()}
-                  className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                >
-                  Sign out ({profile?.display_name ?? user.email})
-                </button>
+                <>
+                  <Link
+                    to="/account"
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                  >
+                    <span className="inline-flex items-center gap-1.5"><UserCircle className="h-3.5 w-3.5" /> My account</span>
+                  </Link>
+                  <button
+                    onClick={() => signOut()}
+                    className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    Sign out ({profile?.display_name ?? user.email})
+                  </button>
+                </>
               ) : (
                 <Link to="/auth" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted">
                   Sign in
