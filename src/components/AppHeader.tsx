@@ -6,12 +6,12 @@ import type { Region } from "@/data/passport";
 import { useAuth } from "@/hooks/use-auth";
 
 const NAV = [
-  { to: "/onboarding", label: "Onboarding" },
-  { to: "/profile", label: "Skills Profile" },
-  { to: "/readiness", label: "AI Readiness" },
-  { to: "/opportunities", label: "Opportunities" },
-  { to: "/policymaker", label: "Policymaker" },
-  { to: "/config", label: "Config" },
+  { to: "/onboarding", label: "Onboarding", hideForAdmin: true },
+  { to: "/profile", label: "Skills Profile", hideForAdmin: true },
+  { to: "/readiness", label: "AI Readiness", hideForAdmin: true },
+  { to: "/opportunities", label: "Opportunities", hideForAdmin: false },
+  { to: "/policymaker", label: "Policymaker", hideForAdmin: false },
+  { to: "/config", label: "Config", hideForAdmin: false },
 ] as const;
 
 export function AppHeader() {
@@ -19,6 +19,8 @@ export function AppHeader() {
   const [open, setOpen] = useState(false);
   const [region, setRegion] = useState<Region>("Sub-Saharan Africa");
   const { user, profile, hasRole, signOut } = useAuth();
+  const isAdmin = hasRole("admin");
+  const visibleNav = NAV.filter((item) => !(isAdmin && item.hideForAdmin));
 
   useEffect(() => {
     setRegion(loadActiveRegion());
@@ -59,7 +61,7 @@ export function AppHeader() {
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
-          {NAV.map((item) => (
+          {visibleNav.map((item) => (
             <Link
               key={item.to}
               to={item.to}
@@ -124,7 +126,7 @@ export function AppHeader() {
       {open && (
         <div className="border-t border-border/70 bg-card/90 lg:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col p-2">
-            {NAV.map((item) => (
+            {visibleNav.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
