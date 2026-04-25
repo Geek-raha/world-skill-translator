@@ -23,7 +23,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignupYouthRouteImport } from './routes/signup.youth'
 import { Route as SignupPolicymakerRouteImport } from './routes/signup.policymaker'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
-import { Route as AdminManageRouteImport } from './routes/admin.manage'
+import { Route as AdminJobsRouteImport } from './routes/admin.jobs'
+import { Route as AdminCountriesRouteImport } from './routes/admin.countries'
 
 const ReadinessRoute = ReadinessRouteImport.update({
   id: '/readiness',
@@ -95,9 +96,14 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/callback',
   getParentRoute: () => AuthRoute,
 } as any)
-const AdminManageRoute = AdminManageRouteImport.update({
-  id: '/manage',
-  path: '/manage',
+const AdminJobsRoute = AdminJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCountriesRoute = AdminCountriesRouteImport.update({
+  id: '/countries',
+  path: '/countries',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -113,7 +119,8 @@ export interface FileRoutesByFullPath {
   '/policymaker': typeof PolicymakerRoute
   '/profile': typeof ProfileRoute
   '/readiness': typeof ReadinessRoute
-  '/admin/manage': typeof AdminManageRoute
+  '/admin/countries': typeof AdminCountriesRoute
+  '/admin/jobs': typeof AdminJobsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/signup/policymaker': typeof SignupPolicymakerRoute
   '/signup/youth': typeof SignupYouthRoute
@@ -130,7 +137,8 @@ export interface FileRoutesByTo {
   '/policymaker': typeof PolicymakerRoute
   '/profile': typeof ProfileRoute
   '/readiness': typeof ReadinessRoute
-  '/admin/manage': typeof AdminManageRoute
+  '/admin/countries': typeof AdminCountriesRoute
+  '/admin/jobs': typeof AdminJobsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/signup/policymaker': typeof SignupPolicymakerRoute
   '/signup/youth': typeof SignupYouthRoute
@@ -148,7 +156,8 @@ export interface FileRoutesById {
   '/policymaker': typeof PolicymakerRoute
   '/profile': typeof ProfileRoute
   '/readiness': typeof ReadinessRoute
-  '/admin/manage': typeof AdminManageRoute
+  '/admin/countries': typeof AdminCountriesRoute
+  '/admin/jobs': typeof AdminJobsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/signup/policymaker': typeof SignupPolicymakerRoute
   '/signup/youth': typeof SignupYouthRoute
@@ -167,7 +176,8 @@ export interface FileRouteTypes {
     | '/policymaker'
     | '/profile'
     | '/readiness'
-    | '/admin/manage'
+    | '/admin/countries'
+    | '/admin/jobs'
     | '/auth/callback'
     | '/signup/policymaker'
     | '/signup/youth'
@@ -184,7 +194,8 @@ export interface FileRouteTypes {
     | '/policymaker'
     | '/profile'
     | '/readiness'
-    | '/admin/manage'
+    | '/admin/countries'
+    | '/admin/jobs'
     | '/auth/callback'
     | '/signup/policymaker'
     | '/signup/youth'
@@ -201,7 +212,8 @@ export interface FileRouteTypes {
     | '/policymaker'
     | '/profile'
     | '/readiness'
-    | '/admin/manage'
+    | '/admin/countries'
+    | '/admin/jobs'
     | '/auth/callback'
     | '/signup/policymaker'
     | '/signup/youth'
@@ -323,22 +335,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/admin/manage': {
-      id: '/admin/manage'
-      path: '/manage'
-      fullPath: '/admin/manage'
-      preLoaderRoute: typeof AdminManageRouteImport
+    '/admin/jobs': {
+      id: '/admin/jobs'
+      path: '/jobs'
+      fullPath: '/admin/jobs'
+      preLoaderRoute: typeof AdminJobsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/countries': {
+      id: '/admin/countries'
+      path: '/countries'
+      fullPath: '/admin/countries'
+      preLoaderRoute: typeof AdminCountriesRouteImport
       parentRoute: typeof AdminRoute
     }
   }
 }
 
 interface AdminRouteChildren {
-  AdminManageRoute: typeof AdminManageRoute
+  AdminCountriesRoute: typeof AdminCountriesRoute
+  AdminJobsRoute: typeof AdminJobsRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminManageRoute: AdminManageRoute,
+  AdminCountriesRoute: AdminCountriesRoute,
+  AdminJobsRoute: AdminJobsRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -371,3 +392,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
