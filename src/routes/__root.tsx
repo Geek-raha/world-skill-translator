@@ -1,7 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { AppHeader } from "@/components/AppHeader";
 
 function NotFoundComponent() {
   return (
@@ -30,14 +29,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Skills-Passport" },
+      { name: "description", content: "Skill Passport translates informal skills into a formal Digital Skill Passport." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Skills-Passport" },
+      { property: "og:description", content: "Skill Passport translates informal skills into a formal Digital Skill Passport." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Skills-Passport" },
+      { name: "twitter:description", content: "Skill Passport translates informal skills into a formal Digital Skill Passport." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e9692f9e-cefa-41d7-b1f6-189f125da774/id-preview-be17094a--d931b89f-2464-49c9-bcf3-2b395b29ca83.lovable.app-1777145476731.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e9692f9e-cefa-41d7-b1f6-189f125da774/id-preview-be17094a--d931b89f-2464-49c9-bcf3-2b395b29ca83.lovable.app-1777145476731.png" },
     ],
     links: [
       {
@@ -72,10 +75,5 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return (
-    <div className="min-h-screen" style={{ background: "var(--gradient-paper)" }}>
-      <AppHeader />
-      <Outlet />
-    </div>
-  );
+  return <Outlet />;
 }
