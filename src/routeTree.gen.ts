@@ -12,10 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReadinessRouteImport } from './routes/readiness'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PolicymakerRouteImport } from './routes/policymaker'
+import { Route as PendingRouteImport } from './routes/pending'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ConfigRouteImport } from './routes/config'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SignupYouthRouteImport } from './routes/signup.youth'
+import { Route as SignupPolicymakerRouteImport } from './routes/signup.policymaker'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 
 const ReadinessRoute = ReadinessRouteImport.update({
   id: '/readiness',
@@ -30,6 +36,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const PolicymakerRoute = PolicymakerRouteImport.update({
   id: '/policymaker',
   path: '/policymaker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PendingRoute = PendingRouteImport.update({
+  id: '/pending',
+  path: '/pending',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
@@ -47,78 +58,144 @@ const ConfigRoute = ConfigRouteImport.update({
   path: '/config',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignupYouthRoute = SignupYouthRouteImport.update({
+  id: '/signup/youth',
+  path: '/signup/youth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupPolicymakerRoute = SignupPolicymakerRouteImport.update({
+  id: '/signup/policymaker',
+  path: '/signup/policymaker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRouteWithChildren
   '/config': typeof ConfigRoute
   '/onboarding': typeof OnboardingRoute
   '/opportunities': typeof OpportunitiesRoute
+  '/pending': typeof PendingRoute
   '/policymaker': typeof PolicymakerRoute
   '/profile': typeof ProfileRoute
   '/readiness': typeof ReadinessRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/signup/policymaker': typeof SignupPolicymakerRoute
+  '/signup/youth': typeof SignupYouthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRouteWithChildren
   '/config': typeof ConfigRoute
   '/onboarding': typeof OnboardingRoute
   '/opportunities': typeof OpportunitiesRoute
+  '/pending': typeof PendingRoute
   '/policymaker': typeof PolicymakerRoute
   '/profile': typeof ProfileRoute
   '/readiness': typeof ReadinessRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/signup/policymaker': typeof SignupPolicymakerRoute
+  '/signup/youth': typeof SignupYouthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRouteWithChildren
   '/config': typeof ConfigRoute
   '/onboarding': typeof OnboardingRoute
   '/opportunities': typeof OpportunitiesRoute
+  '/pending': typeof PendingRoute
   '/policymaker': typeof PolicymakerRoute
   '/profile': typeof ProfileRoute
   '/readiness': typeof ReadinessRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/signup/policymaker': typeof SignupPolicymakerRoute
+  '/signup/youth': typeof SignupYouthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
+    | '/auth'
     | '/config'
     | '/onboarding'
     | '/opportunities'
+    | '/pending'
     | '/policymaker'
     | '/profile'
     | '/readiness'
+    | '/auth/callback'
+    | '/signup/policymaker'
+    | '/signup/youth'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
+    | '/auth'
     | '/config'
     | '/onboarding'
     | '/opportunities'
+    | '/pending'
     | '/policymaker'
     | '/profile'
     | '/readiness'
+    | '/auth/callback'
+    | '/signup/policymaker'
+    | '/signup/youth'
   id:
     | '__root__'
     | '/'
+    | '/admin'
+    | '/auth'
     | '/config'
     | '/onboarding'
     | '/opportunities'
+    | '/pending'
     | '/policymaker'
     | '/profile'
     | '/readiness'
+    | '/auth/callback'
+    | '/signup/policymaker'
+    | '/signup/youth'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  AuthRoute: typeof AuthRouteWithChildren
   ConfigRoute: typeof ConfigRoute
   OnboardingRoute: typeof OnboardingRoute
   OpportunitiesRoute: typeof OpportunitiesRoute
+  PendingRoute: typeof PendingRoute
   PolicymakerRoute: typeof PolicymakerRoute
   ProfileRoute: typeof ProfileRoute
   ReadinessRoute: typeof ReadinessRoute
+  SignupPolicymakerRoute: typeof SignupPolicymakerRoute
+  SignupYouthRoute: typeof SignupYouthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -144,6 +221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PolicymakerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pending': {
+      id: '/pending'
+      path: '/pending'
+      fullPath: '/pending'
+      preLoaderRoute: typeof PendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/opportunities': {
       id: '/opportunities'
       path: '/opportunities'
@@ -165,6 +249,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -172,17 +270,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signup/youth': {
+      id: '/signup/youth'
+      path: '/signup/youth'
+      fullPath: '/signup/youth'
+      preLoaderRoute: typeof SignupYouthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup/policymaker': {
+      id: '/signup/policymaker'
+      path: '/signup/policymaker'
+      fullPath: '/signup/policymaker'
+      preLoaderRoute: typeof SignupPolicymakerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
 
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  AuthRoute: AuthRouteWithChildren,
   ConfigRoute: ConfigRoute,
   OnboardingRoute: OnboardingRoute,
   OpportunitiesRoute: OpportunitiesRoute,
+  PendingRoute: PendingRoute,
   PolicymakerRoute: PolicymakerRoute,
   ProfileRoute: ProfileRoute,
   ReadinessRoute: ReadinessRoute,
+  SignupPolicymakerRoute: SignupPolicymakerRoute,
+  SignupYouthRoute: SignupYouthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
