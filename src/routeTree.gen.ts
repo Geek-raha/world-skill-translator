@@ -20,6 +20,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as SignupYouthRouteImport } from './routes/signup.youth'
 import { Route as SignupPolicymakerRouteImport } from './routes/signup.policymaker'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
@@ -81,6 +82,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const SignupYouthRoute = SignupYouthRouteImport.update({
   id: '/signup/youth',
   path: '/signup/youth',
@@ -124,11 +130,11 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/signup/policymaker': typeof SignupPolicymakerRoute
   '/signup/youth': typeof SignupYouthRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
-  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/config': typeof ConfigRoute
   '/onboarding': typeof OnboardingRoute
@@ -142,6 +148,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/signup/policymaker': typeof SignupPolicymakerRoute
   '/signup/youth': typeof SignupYouthRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,6 +168,7 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/signup/policymaker': typeof SignupPolicymakerRoute
   '/signup/youth': typeof SignupYouthRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -181,11 +189,11 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/signup/policymaker'
     | '/signup/youth'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/account'
-    | '/admin'
     | '/auth'
     | '/config'
     | '/onboarding'
@@ -199,6 +207,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/signup/policymaker'
     | '/signup/youth'
+    | '/admin'
   id:
     | '__root__'
     | '/'
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/signup/policymaker'
     | '/signup/youth'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -314,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/signup/youth': {
       id: '/signup/youth'
       path: '/signup/youth'
@@ -355,11 +372,13 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminCountriesRoute: typeof AdminCountriesRoute
   AdminJobsRoute: typeof AdminJobsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminCountriesRoute: AdminCountriesRoute,
   AdminJobsRoute: AdminJobsRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
