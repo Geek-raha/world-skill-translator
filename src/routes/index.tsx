@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BarChart3, Compass, Globe2, ShieldCheck, Sparkles } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,6 +47,7 @@ const FLOW = [
 ] as const;
 
 function LandingPage() {
+  const { user } = useAuth();
   return (
     <main className="pb-20">
       {/* Hero */}
@@ -69,6 +71,8 @@ function LandingPage() {
               calibrated honestly for the economies most workers actually live in.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
+              {!user ? (
+                <>
               <Link
                 to="/signup/youth"
                 className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold shadow-[var(--shadow-elevated)]"
@@ -92,6 +96,19 @@ function LandingPage() {
               >
                 Already have an account? Sign in
               </Link>
+                </>
+              ) : (
+                <Link
+                  to="/profile"
+                  className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold shadow-[var(--shadow-elevated)]"
+                  style={{
+                    background: "var(--gradient-ink)",
+                    color: "var(--surface-ink-foreground)",
+                  }}
+                >
+                  Go to your passport <ArrowRight className="h-4 w-4" />
+                </Link>
+              )}
             </div>
           </div>
 
@@ -172,9 +189,6 @@ function LandingPage() {
               </div>
               <h3 className="mt-4 font-display text-xl font-semibold tracking-tight">{f.title}</h3>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-foreground transition-transform group-hover:translate-x-1">
-                Open <ArrowRight className="h-3 w-3" />
-              </span>
             </Link>
           ))}
         </div>
