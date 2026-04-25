@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Download, Filter, Users } from "lucide-react";
 import {
@@ -8,7 +8,6 @@ import {
   type Region,
 } from "@/data/passport";
 import { loadActiveRegion } from "@/lib/profile-store";
-import { useEffect } from "react";
 
 export const Route = createFileRoute("/policymaker")({
   head: () => ({
