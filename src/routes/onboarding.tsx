@@ -8,7 +8,7 @@ import {
   type Region,
   type SkillPassport,
 } from "@/data/passport";
-import { REGIONS } from "@/data/regions";
+import { REGIONS, SETTINGS, getEducationLevels, getRegion } from "@/data/regions";
 import {
   DEFAULT_DRAFT,
   notifyProfileChange,
@@ -30,23 +30,6 @@ export const Route = createFileRoute("/onboarding")({
   }),
   component: OnboardingPage,
 });
-
-const EDUCATION_BY_REGION: Record<Region, string[]> = {
-  "Sub-Saharan Africa": [
-    "Did not complete BECE",
-    "BECE (basic school)",
-    "SHS / Vocational",
-    "Tertiary (Polytechnic / University)",
-    "Self-taught / informal apprenticeship",
-  ],
-  "South Asia": [
-    "Below SSC",
-    "SSC (secondary)",
-    "HSC (higher secondary)",
-    "Tertiary (College / University)",
-    "Self-taught / informal apprenticeship",
-  ],
-};
 
 const STEPS = ["Context", "Education", "Experience", "Confirm", "Passport"] as const;
 
