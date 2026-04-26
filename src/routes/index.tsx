@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BarChart3, Compass, Globe2, ShieldCheck, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import heroVideo from "@/assets/hero-job-apply.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -48,11 +50,71 @@ const FLOW = [
 
 function LandingPage() {
   const { user } = useAuth();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const heroRef = useRef<HTMLDivElement | null>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  // Slow the loop so it feels ambient, and make sure it autoplays on mount
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.playbackRate = 0.75;
+    const tryPlay = () => v.play().catch(() => {});
+    tryPlay();
+  }, []);
+
+  // Interactive parallax: subtle scale + translate based on cursor position
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = heroRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ x: px, y: py });
+  };
+
+  const handleMouseLeave = () => setTilt({ x: 0, y: 0 });
+
   return (
     <main className="pb-20">
       {/* Hero */}
-      <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6 sm:pt-16">
-        <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end">
+      <section
+        ref={heroRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="relative isolate overflow-hidden"
+      >
+        {/* Background video layer */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <video
+            ref={videoRef}
+            src={heroVideo.url}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+            className="h-full w-full object-cover transition-transform duration-300 ease-out will-change-transform"
+            style={{
+              transform: `scale(1.08) translate3d(${tilt.x * -16}px, ${tilt.y * -12}px, 0)`,
+            }}
+          />
+          {/* Readability overlay tuned to the ink palette */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, color-mix(in oklab, var(--background) 78%, transparent) 0%, color-mix(in oklab, var(--background) 62%, transparent) 55%, var(--background) 100%)",
+            }}
+          />
+          <div
+            className="absolute inset-0 mix-blend-multiply opacity-60"
+            style={{ background: "var(--gradient-ink)" }}
+          />
+        </div>
+
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 pt-10 sm:px-6 sm:pt-16 lg:grid-cols-[1.2fr_1fr] lg:items-end">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Module 01–03 · Country-agnostic
