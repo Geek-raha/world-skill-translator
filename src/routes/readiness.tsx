@@ -51,35 +51,66 @@ function ReadinessPage() {
         </p>
 
         {/* Automation risk gauge — driven by agent response when available */}
-        <section
-          className="mt-6 overflow-hidden rounded-3xl border border-border shadow-[var(--shadow-elevated)]"
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          whileHover={{ y: -2 }}
+          className="neon-frame aurora-bg grid-overlay mt-6 overflow-hidden rounded-3xl border border-border shadow-[var(--shadow-elevated)]"
           style={{ background: "var(--gradient-ink)", color: "var(--surface-ink-foreground)" }}
         >
-          <div className="space-y-5 p-5 sm:p-6">
+          {/* Neon orb accents */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-16 -right-12 h-48 w-48 rounded-full blur-3xl animate-aurora"
+            style={{ background: "color-mix(in oklab, var(--neon-violet) 55%, transparent)" }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full blur-3xl animate-aurora"
+            style={{ background: "color-mix(in oklab, var(--neon-cyan) 50%, transparent)" }}
+          />
+          <div className="relative space-y-5 p-5 sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">
-                  Automation risk index
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-surface-ink-foreground/70">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span
+                        className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-neon-pulse"
+                        style={{ background: "var(--neon-cyan)" }}
+                      />
+                      <span
+                        className="relative inline-flex h-1.5 w-1.5 rounded-full"
+                        style={{ background: "var(--neon-cyan)" }}
+                      />
+                    </span>
+                    Automation risk index
+                  </span>
                 </p>
                 <h3 className="mt-1 font-display text-2xl font-semibold leading-tight">
                   {gaugeTone.label}
                 </h3>
               </div>
               <span
-                className="rounded-full px-3 py-1 text-xs font-semibold"
+                className="rounded-full px-3 py-1 text-xs font-semibold shadow-[var(--glow-violet)]"
                 style={{ background: gaugeTone.bg, color: gaugeTone.fg }}
               >
                 {riskLevel ?? "Unknown"}
               </span>
             </div>
             <div className="space-y-2">
-              <div className="relative h-3 overflow-hidden rounded-full">
+              <div className="relative h-3 overflow-hidden rounded-full ring-1 ring-surface-ink-foreground/15">
                 <div
-                  className="absolute inset-0 opacity-40"
+                  className="absolute inset-0 opacity-60"
                   style={{ background: "var(--gradient-risk-meter)" }}
                 />
+                <div
+                  className="absolute inset-0 opacity-30 mix-blend-screen"
+                  style={{ background: "var(--gradient-neon)" }}
+                />
                 <motion.div
-                  className="absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-surface-ink-foreground shadow-[var(--shadow-elevated)]"
+                  className="absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-surface-ink-foreground shadow-[var(--glow-cyan)]"
                   style={{ background: gaugeTone.bg }}
                   initial={{ left: "0%" }}
                   animate={{ left: `${gaugePosition}%` }}
@@ -93,7 +124,7 @@ function ReadinessPage() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* ISCO matched role cards — automation probability per role from API */}
         {roles.length > 0 && (
@@ -121,7 +152,8 @@ function ReadinessPage() {
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04 }}
-                    className="rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+                    whileHover={{ y: -3 }}
+                    className="neon-frame lift-on-hover shine rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2">
