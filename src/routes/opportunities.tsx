@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import type { Opportunity } from "@/data/passport";
+import { useAgentResponse } from "@/lib/agent-response";
+import { EconometricSignals } from "@/components/EconometricSignals";
 
 interface AdminJob {
   id: string;
@@ -55,6 +57,7 @@ const TYPE_ICON: Record<Opportunity["type"], typeof Briefcase> = {
 
 function OpportunitiesPage() {
   const { passport } = useActiveProfile();
+  const agent = useAgentResponse();
   const [filter, setFilter] = useState<Opportunity["type"] | "All">("All");
   const { user, loading, hasRole } = useAuth();
   const isAdmin = hasRole("admin");

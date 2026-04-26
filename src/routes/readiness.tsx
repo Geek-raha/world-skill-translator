@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, ShieldAlert, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 import { useActiveProfile } from "@/lib/profile-store";
 import type { ProfileSkill, SkillBucket } from "@/data/passport";
+import { useAgentResponse } from "@/lib/agent-response";
 
 export const Route = createFileRoute("/readiness")({
   head: () => ({
@@ -47,6 +48,17 @@ const BUCKET_META: Record<
 
 function ReadinessPage() {
   const { passport } = useActiveProfile();
+  const agent = useAgentResponse();
+
+  // Prefer agent-provided risk level if present.
+  const riskLevel = agent?.automation_risk_level ?? passport.automation_risk_level;
+  const gaugePosition = riskLevel === "Low" ? 16 : riskLevel === "Medium" ? 50 : 84;
+  const gaugeTone =
+    riskLevel === "High"
+      ? { bg: "var(--risk-high)", fg: "var(--risk-high-foreground)", label: "High exposure" }
+      : riskLevel === "Medium"
+      ? { bg: "var(--risk-medium)", fg: "var(--risk-medium-foreground)", label: "Mixed exposure" }
+      : { bg: "var(--risk-low)", fg: "var(--risk-low-foreground)", label: "Resilient" };
 
   const grouped: Record<SkillBucket, ProfileSkill[]> = {
     at_risk: [],
@@ -74,6 +86,51 @@ function ReadinessPage() {
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
           We tell you what's shifting and what isn't — calibrated for {passport.country}.
         </p>
+
+        {/* Automation risk gauge — driven by agent response when available */}
+        <section
+          className="mt-6 overflow-hidden rounded-3xl border border-border shadow-[var(--shadow-elevated)]"
+          style={{ background: "var(--gradient-ink)", color: "var(--surface-ink-foreground)" }}
+        >
+          <div className="space-y-5 p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">
+                  Automation risk index
+                </p>
+                <h3 className="mt-1 font-display text-2xl font-semibold leading-tight">
+                  {gaugeTone.label}
+                </h3>
+              </div>
+              <span
+                className="rounded-full px-3 py-1 text-xs font-semibold"
+                style={{ background: gaugeTone.bg, color: gaugeTone.fg }}
+              >
+                {riskLevel}
+              </span>
+            </div>
+            <div className="space-y-2">
+              <div className="relative h-3 overflow-hidden rounded-full">
+                <div
+                  className="absolute inset-0 opacity-40"
+                  style={{ background: "var(--gradient-risk-meter)" }}
+                />
+                <motion.div
+                  className="absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-surface-ink-foreground shadow-[var(--shadow-elevated)]"
+                  style={{ background: gaugeTone.bg }}
+                  initial={{ left: "0%" }}
+                  animate={{ left: `${gaugePosition}%` }}
+                  transition={{ type: "spring", stiffness: 120, damping: 18, delay: 0.15 }}
+                />
+              </div>
+              <div className="flex justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-surface-ink-foreground/50">
+                <span>Low</span>
+                <span>Medium</span>
+                <span>High</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Calibration banner */}
         <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
