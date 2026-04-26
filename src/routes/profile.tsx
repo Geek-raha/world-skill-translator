@@ -91,10 +91,20 @@ function ProfilePage() {
         {/* Header card */}
         <motion.section
           layout
-          className="mt-6 overflow-hidden rounded-3xl border border-border shadow-[var(--shadow-elevated)]"
+          className="neon-frame aurora-bg grid-overlay relative mt-6 overflow-hidden rounded-3xl border border-border shadow-[var(--shadow-elevated)]"
           style={{ background: "var(--gradient-ink)", color: "var(--surface-ink-foreground)" }}
         >
-          <div className="grid gap-4 p-6 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-16 -right-12 h-44 w-44 rounded-full blur-3xl animate-aurora"
+            style={{ background: "color-mix(in oklab, var(--neon-cyan) 45%, transparent)" }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-20 -left-10 h-52 w-52 rounded-full blur-3xl animate-aurora"
+            style={{ background: "color-mix(in oklab, var(--neon-violet) 45%, transparent)" }}
+          />
+          <div className="relative grid gap-4 p-6 sm:grid-cols-[1fr_auto] sm:items-end">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">
                 ISCO-08 · Frey-Osborne automation model
@@ -106,7 +116,7 @@ function ProfilePage() {
               )}
             </div>
             <div className="flex flex-col items-start gap-2 sm:items-end">
-              <span className="rounded-full bg-surface-ink-foreground/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em]">
+              <span className="rounded-full bg-surface-ink-foreground/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] shadow-[var(--glow-cyan)]">
                 ISCO-08 aligned
               </span>
               <span className="font-display text-lg font-semibold">
@@ -122,9 +132,13 @@ function ProfilePage() {
             const agentSkills = agentGrouped?.[cat] ?? [];
             const count = agentSkills.length;
             return (
-            <section
+            <motion.section
               key={cat}
-              className="rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -3 }}
+              className="neon-frame lift-on-hover shine rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
             >
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">
@@ -141,18 +155,20 @@ function ProfilePage() {
                   </li>
                 ) : (
                   agentSkills.map((name) => (
-                    <li
+                    <motion.li
                       key={name}
-                      className="rounded-2xl border border-border/70 bg-surface-paper p-3"
+                      whileHover={{ x: 3 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+                      className="rounded-2xl border border-border/70 bg-surface-paper p-3 transition-colors hover:border-[color:var(--neon-violet)]"
                     >
                       <p className="font-display text-sm font-semibold leading-snug">
                         {name}
                       </p>
-                    </li>
+                    </motion.li>
                   ))
                 )}
               </ul>
-            </section>
+            </motion.section>
             );
           })}
         </div>
@@ -183,7 +199,8 @@ function ProfilePage() {
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04 }}
-                    className="rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+                    whileHover={{ y: -3 }}
+                    className="neon-frame lift-on-hover shine rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2">
