@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import type { Opportunity } from "@/data/passport";
+import { useAgentResponse } from "@/lib/agent-response";
+import { EconometricSignals } from "@/components/EconometricSignals";
 
 interface AdminJob {
   id: string;
@@ -55,6 +57,7 @@ const TYPE_ICON: Record<Opportunity["type"], typeof Briefcase> = {
 
 function OpportunitiesPage() {
   const { passport } = useActiveProfile();
+  const agent = useAgentResponse();
   const [filter, setFilter] = useState<Opportunity["type"] | "All">("All");
   const { user, loading, hasRole } = useAuth();
   const isAdmin = hasRole("admin");
@@ -188,6 +191,16 @@ function OpportunitiesPage() {
             >
               <Plus className="h-3.5 w-3.5" /> Add opportunity
             </Link>
+          </div>
+        )}
+
+        {/* Econometric signals from the agent — context for opportunity decisions */}
+        {!isAdmin && agent?.econometric_signals && agent.econometric_signals.length > 0 && (
+          <div className="mt-6">
+            <EconometricSignals
+              signals={agent.econometric_signals}
+              title="Labor market signals · ILO ILOSTAT"
+            />
           </div>
         )}
 
