@@ -129,9 +129,13 @@ function ProfilePage() {
         {/* Visual map */}
         <div className="mt-8 grid gap-5 lg:grid-cols-3">
           {(Object.keys(grouped) as SkillCategory[]).map((cat) => {
+            // If we have any agent response, always trust it as the source of truth
+            // (even when a given category is empty) so cards reflect what the user
+            // actually said in onboarding step 3 — not the demo passport.
+            const hasAgent = !!agentGrouped;
             const agentSkills = agentGrouped?.[cat] ?? [];
             const passportSkills = grouped[cat];
-            const useAgent = agentSkills.length > 0;
+            const useAgent = hasAgent;
             const count = useAgent ? agentSkills.length : passportSkills.length;
             return (
             <section
