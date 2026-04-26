@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Check, Globe2, Languages, Save, Settings2 } from "lucide-react";
 import { COUNTRY_CONFIGS, type CountryConfig, type Region } from "@/data/passport";
 import { loadActiveRegion, setActiveRegion } from "@/lib/profile-store";
+import { REGION_NAMES } from "@/data/regions";
 
 export const Route = createFileRoute("/config")({
   head: () => ({
@@ -18,8 +19,6 @@ export const Route = createFileRoute("/config")({
   }),
   component: ConfigPage,
 });
-
-const REGIONS: Region[] = ["Sub-Saharan Africa", "South Asia"];
 
 const ALL_TYPES: CountryConfig["enabledOpportunityTypes"] = [
   "Formal job",
@@ -75,7 +74,7 @@ function ConfigPage() {
 
         {/* Region switcher */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          {REGIONS.map((r) => {
+          {REGION_NAMES.map((r) => {
             const active = region === r;
             const c = COUNTRY_CONFIGS[r];
             return (
