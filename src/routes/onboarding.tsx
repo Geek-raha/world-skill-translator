@@ -291,7 +291,7 @@ function ContextStep({
           Setting
         </p>
         <div className="grid grid-cols-2 gap-2">
-          {(["Urban", "Rural"] as const).map((s) => {
+          {SETTINGS.map((s) => {
             const active = draft.setting === s;
             return (
               <button
@@ -323,7 +323,8 @@ function EducationStep({
   value: string;
   onChange: (v: string) => void;
 }) {
-  const options = EDUCATION_BY_REGION[region];
+  const options = getEducationLevels(region);
+  const taxonomyLabel = getRegion(region).educationTaxonomyLabel;
   return (
     <div className="space-y-6">
       <div>
@@ -331,8 +332,7 @@ function EducationStep({
           What's your education background?
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Mapped to the {region === "Sub-Saharan Africa" ? "Ghana NQF" : "Bangladesh NQF"} —
-          not a Western equivalent.
+          Mapped to the {taxonomyLabel} — not a Western equivalent.
         </p>
       </div>
 
