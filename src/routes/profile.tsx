@@ -5,6 +5,8 @@ import type { SkillCategory } from "@/data/passport";
 import { EconometricSignals } from "@/components/EconometricSignals";
 import { useAssessment } from "@/context/AssessmentContext";
 import { NoAssessmentData } from "@/components/NoAssessmentData";
+import { StampBadge } from "@/components/ornaments/StampBadge";
+import { Guilloche } from "@/components/ornaments/Guilloche";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -24,6 +26,12 @@ const CATEGORY_LABEL: Record<SkillCategory, string> = {
   technical: "Technical",
   interpersonal: "Interpersonal",
   entrepreneurial: "Entrepreneurial",
+};
+
+const CATEGORY_TONE: Record<SkillCategory, "red" | "green" | "blue"> = {
+  technical: "blue",
+  interpersonal: "green",
+  entrepreneurial: "red",
 };
 
 function ProfilePage() {
@@ -124,16 +132,20 @@ function ProfilePage() {
             return (
             <section
               key={cat}
-              className="rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+              className="passport-edge relative overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
             >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-[0.15]"
+                style={{ backgroundImage: "var(--guilloche)" }}
+              />
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">
                   {CATEGORY_LABEL[cat]}
                 </h2>
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {count}
-                </span>
+                <StampBadge label={String(count)} tone={CATEGORY_TONE[cat]} />
               </div>
+              <Guilloche className="mt-3" height={10} />
               <ul className="mt-4 space-y-3">
                 {count === 0 ? (
                   <li className="text-xs italic text-muted-foreground">
