@@ -78,6 +78,54 @@ function PolicymakerPage() {
   const data = AGGREGATE_SUPPLY_DEMAND[region];
   const econ = REGION_ECONOMETRICS[region];
 
+  const handleExportCSV = () => {
+    const escape = (v: string | number) => {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines: string[] = [];
+    lines.push(`UNMAPPED Policymaker Export`);
+    lines.push(`Generated,${new Date().toISOString()}`);
+    lines.push(`Region,${escape(region)}`);
+    lines.push(`Gender filter,${escape(gender)}`);
+    lines.push(`Education filter,${escape(education)}`);
+    lines.push("");
+    lines.push("Section,Skills supply vs. employer demand");
+    lines.push("Skill,Supply (%),Demand (%),Gap");
+    data.forEach((row) => {
+      lines.push(
+        [escape(row.label), row.supply, row.demand, row.demand - row.supply].join(","),
+      );
+    });
+    lines.push("");
+    lines.push("Section,Econometric signals");
+    lines.push("Metric,Value");
+    lines.push(`Youth NEET,${escape(econ.neet)}`);
+    lines.push(`Sector trend,${escape(econ.sectorTrend)}`);
+    lines.push(`Wage floor,${escape(econ.wageFloor)}`);
+    lines.push(`Source,${escape(econ.source)}`);
+    lines.push("");
+    lines.push("Section,Top stats");
+    lines.push("Metric,Value,Note");
+    lines.push(`Active profiles,14820,${escape(`${region}, last 30d`)}`);
+    lines.push(`Median match score,71,Across surfaced opportunities`);
+    lines.push(`At-risk share,34%,Skills exposed to AI displacement`);
+    lines.push(`Demand-gap roles,6,Where supply trails demand >10 pts`);
+
+    const csv = lines.join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const slug = region.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const date = new Date().toISOString().slice(0, 10);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `unmapped-policymaker-${slug}-${date}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <main className="pb-20">
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12">
@@ -95,6 +143,8 @@ function PolicymakerPage() {
             </p>
           </div>
           <button
+            onClick={handleExportCSV}
+            type="button"
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted"
           >
             <Download className="h-3.5 w-3.5" /> Export CSV
