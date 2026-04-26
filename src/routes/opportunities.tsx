@@ -194,6 +194,16 @@ function OpportunitiesPage() {
           </div>
         )}
 
+        {/* Econometric signals from the agent — context for opportunity decisions */}
+        {!isAdmin && agent?.econometric_signals && agent.econometric_signals.length > 0 && (
+          <div className="mt-6">
+            <EconometricSignals
+              signals={agent.econometric_signals}
+              title="Labor market signals · ILO ILOSTAT"
+            />
+          </div>
+        )}
+
         {/* Filter chips */}
         <div className="mt-6 flex flex-wrap gap-2">
           {(["All", ...TYPES] as const).map((t) => {
