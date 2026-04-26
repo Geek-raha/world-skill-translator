@@ -3,6 +3,7 @@ import { ArrowRight, BarChart3, Compass, Globe2, ShieldCheck, Sparkles } from "l
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import heroVideo from "@/assets/hero-job-apply.mp4.asset.json";
+import { Guilloche } from "@/components/ornaments/Guilloche";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -175,9 +176,14 @@ function LandingPage() {
           </div>
 
           <div
-            className="relative overflow-hidden rounded-3xl border border-border p-6 shadow-[var(--shadow-elevated)]"
+            className="passport-edge relative overflow-hidden rounded-3xl border border-border p-6 shadow-[var(--shadow-elevated)]"
             style={{ background: "var(--gradient-ink)", color: "var(--surface-ink-foreground)" }}
           >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-20"
+              style={{ backgroundImage: "var(--guilloche)" }}
+            />
             <div className="flex items-center justify-between">
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-surface-ink-foreground/60">
                 Live demo signal
@@ -223,6 +229,7 @@ function LandingPage() {
 
       {/* Flow */}
       <section className="mx-auto mt-20 max-w-6xl px-4 sm:px-6">
+        <Guilloche className="mb-6" />
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
             How the passport gets built
