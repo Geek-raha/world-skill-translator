@@ -126,7 +126,7 @@ function LandingPage() {
               <br />
               never had.
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
               Amara fixes phones in Accra. Riya tailors from a one-room studio in Dhaka.
               Both have skills the labour market refuses to read. The Digital Skill
               Passport translates informal experience into globally legible signals —
