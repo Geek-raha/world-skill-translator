@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Briefcase, Download, Edit3, ExternalLink, Info, Share2 } from "lucide-react";
-import { useActiveProfile } from "@/lib/profile-store";
-import type { ProfileSkill, SkillCategory } from "@/data/passport";
+import type { SkillCategory } from "@/data/passport";
 import { useState } from "react";
-import { useAgentResponse } from "@/lib/agent-response";
 import { EconometricSignals } from "@/components/EconometricSignals";
+import { useAssessment } from "@/context/AssessmentContext";
+import { NoAssessmentData } from "@/components/NoAssessmentData";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -27,26 +27,20 @@ const CATEGORY_LABEL: Record<SkillCategory, string> = {
   entrepreneurial: "Entrepreneurial",
 };
 
-const BUCKET_TONE: Record<ProfileSkill["bucket"], { dot: string; label: string }> = {
-  durable: { dot: "var(--risk-low)", label: "Durable" },
-  emerging: { dot: "var(--accent)", label: "Emerging" },
-  at_risk: { dot: "var(--risk-high)", label: "At risk" },
-};
-
 function ProfilePage() {
-  const { passport, isCustom } = useActiveProfile();
-  const agent = useAgentResponse();
-  const [openTip, setOpenTip] = useState<string | null>(null);
+  const { data: agent } = useAssessment();
+  const [, setOpenTip] = useState<string | null>(null);
 
-  const grouped: Record<SkillCategory, ProfileSkill[]> = {
-    technical: [],
-    interpersonal: [],
-    entrepreneurial: [],
-  };
-  for (const s of passport.skills) grouped[s.category].push(s);
+  // Strict: pages render from global state only. No demo fallback.
+  if (!agent) {
+    return <NoAssessmentData pageLabel="Module 01 · Skills Profile" />;
+  }
 
-  // If we have a fresh agent response, prefer its category groupings (plain strings).
-  const agentGrouped = agent?.skills_by_category;
+  const agentGrouped = agent.skills_by_category;
+  const totalMapped =
+    (agentGrouped?.technical?.length ?? 0) +
+    (agentGrouped?.interpersonal?.length ?? 0) +
+    (agentGrouped?.entrepreneurial?.length ?? 0);
 
   function copyShareLink() {
     if (typeof window === "undefined") return;
@@ -60,14 +54,6 @@ function ProfilePage() {
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             Module 01 · Skills Profile
           </p>
-          {!isCustom && (
-            <Link
-              to="/onboarding"
-              className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
-            >
-              Demo data — start onboarding →
-            </Link>
-          )}
         </div>
 
         <h1 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
@@ -109,18 +95,20 @@ function ProfilePage() {
           <div className="grid gap-4 p-6 sm:grid-cols-[1fr_auto] sm:items-end">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">
-                {passport.country} · {passport.region}
+                ISCO-08 · Frey-Osborne automation model
               </p>
-              <p className="mt-3 font-display text-xl italic leading-snug">
-                "{passport.informal_input}"
-              </p>
+              {agent.formal_skills?.length > 0 && (
+                <p className="mt-3 font-display text-xl italic leading-snug">
+                  {agent.formal_skills.length} formal skills detected
+                </p>
+              )}
             </div>
             <div className="flex flex-col items-start gap-2 sm:items-end">
               <span className="rounded-full bg-surface-ink-foreground/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em]">
                 ISCO-08 aligned
               </span>
               <span className="font-display text-lg font-semibold">
-                {passport.skills.length} skills mapped
+                {totalMapped} skills mapped
               </span>
             </div>
           </div>
@@ -128,15 +116,9 @@ function ProfilePage() {
 
         {/* Visual map */}
         <div className="mt-8 grid gap-5 lg:grid-cols-3">
-          {(Object.keys(grouped) as SkillCategory[]).map((cat) => {
-            // If we have any agent response, always trust it as the source of truth
-            // (even when a given category is empty) so cards reflect what the user
-            // actually said in onboarding step 3 — not the demo passport.
-            const hasAgent = !!agentGrouped;
+          {(["technical", "interpersonal", "entrepreneurial"] as SkillCategory[]).map((cat) => {
             const agentSkills = agentGrouped?.[cat] ?? [];
-            const passportSkills = grouped[cat];
-            const useAgent = hasAgent;
-            const count = useAgent ? agentSkills.length : passportSkills.length;
+            const count = agentSkills.length;
             return (
             <section
               key={cat}
@@ -155,7 +137,7 @@ function ProfilePage() {
                   <li className="text-xs italic text-muted-foreground">
                     No skills in this category yet.
                   </li>
-                ) : useAgent ? (
+                ) : (
                   agentSkills.map((name) => (
                     <li
                       key={name}
@@ -164,43 +146,6 @@ function ProfilePage() {
                       <p className="font-display text-sm font-semibold leading-snug">
                         {name}
                       </p>
-                    </li>
-                  ))
-                ) : (
-                  passportSkills.map((s) => (
-                    <li
-                      key={s.name}
-                      className="rounded-2xl border border-border/70 bg-surface-paper p-3"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-display text-sm font-semibold leading-snug">
-                            {s.name}
-                          </p>
-                          <div className="mt-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                            <span
-                              className="h-1.5 w-1.5 rounded-full"
-                              style={{ background: BUCKET_TONE[s.bucket].dot }}
-                            />
-                            {BUCKET_TONE[s.bucket].label}
-                            {s.isco && (
-                              <span className="font-mono">· ISCO {s.isco}</span>
-                            )}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => setOpenTip((t) => (t === s.name ? null : s.name))}
-                          aria-label={`Explain ${s.name}`}
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                          <Info className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                      {openTip === s.name && (
-                        <p className="mt-2 rounded-xl bg-muted/60 p-2.5 text-xs leading-relaxed text-foreground">
-                          {s.meaning}
-                        </p>
-                      )}
                     </li>
                   ))
                 )}
