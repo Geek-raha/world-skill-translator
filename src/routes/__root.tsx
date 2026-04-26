@@ -4,6 +4,7 @@ import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { AppHeader } from "@/components/AppHeader";
+import { AssessmentProvider } from "@/context/AssessmentContext";
 
 function NotFoundComponent() {
   return (
@@ -80,9 +81,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <AuthProvider>
-      <AppHeader />
-      <Outlet />
-      <Toaster richColors position="top-right" />
+      <AssessmentProvider>
+        <AppHeader />
+        <Outlet />
+        <Toaster richColors position="top-right" />
+      </AssessmentProvider>
     </AuthProvider>
   );
 }

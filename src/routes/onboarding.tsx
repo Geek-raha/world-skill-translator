@@ -12,11 +12,12 @@ import { REGIONS, SETTINGS, getEducationLevels, getRegion } from "@/data/regions
 import {
   DEFAULT_DRAFT,
   notifyProfileChange,
-  saveAgentResponse,
   saveProfile,
   setActiveRegion,
   type OnboardingDraft,
 } from "@/lib/profile-store";
+import { useAssessment } from "@/context/AssessmentContext";
+import type { AgentResponse } from "@/lib/agent-response";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
@@ -36,12 +37,12 @@ const STEPS = ["Context", "Education", "Experience", "Confirm", "Passport"] as c
 
 function OnboardingPage() {
   const navigate = useNavigate();
+  const { setData: setAssessmentData } = useAssessment();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<OnboardingDraft>(DEFAULT_DRAFT);
   const [interpreting, setInterpreting] = useState(false);
   const [interpreted, setInterpreted] = useState<string[]>([]);
   const [mapping, setMapping] = useState(false);
-  const [agentResponse, setAgentResponse] = useState<Record<string, unknown> | null>(null);
   const [mappingError, setMappingError] = useState<string | null>(null);
 
   const seed = PASSPORTS[draft.region];
@@ -79,9 +80,12 @@ function OnboardingPage() {
             }
           );
           if (!res.ok) throw new Error(`Request failed (${res.status})`);
-          const data = (await res.json()) as Record<string, unknown>;
-          setAgentResponse(data);
-          saveAgentResponse(data);
+          const data = (await res.json()) as AgentResponse;
+          // Surface raw payload so the backend dev can verify shape.
+          // eslint-disable-next-line no-console
+          console.log("API Response:", data);
+          // Single source of truth: write into global state (also persists).
+          setAssessmentData(data);
 
           // Persist a passport rooted in the user's actual input so /profile reflects it.
           const passport: SkillPassport = {
