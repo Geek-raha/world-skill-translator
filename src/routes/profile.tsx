@@ -29,12 +29,16 @@ const CATEGORY_LABEL: Record<SkillCategory, string> = {
 function ProfilePage() {
   const { data: agent } = useAssessment();
 
+  // Diagnostic: verify exactly what the page is trying to render.
+  // eslint-disable-next-line no-console
+  console.log("Current Global State:", agent);
+
   // Strict: pages render from global state only. No demo fallback.
   if (!agent) {
     return <NoAssessmentData pageLabel="Module 01 · Skills Profile" />;
   }
 
-  const agentGrouped = agent.skills_by_category;
+  const agentGrouped = agent?.skills_by_category;
   const totalMapped =
     (agentGrouped?.technical?.length ?? 0) +
     (agentGrouped?.interpersonal?.length ?? 0) +
@@ -95,9 +99,9 @@ function ProfilePage() {
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">
                 ISCO-08 · Frey-Osborne automation model
               </p>
-              {agent.formal_skills?.length > 0 && (
+              {(agent?.formal_skills?.length ?? 0) > 0 && (
                 <p className="mt-3 font-display text-xl italic leading-snug">
-                  {agent.formal_skills.length} formal skills detected
+                  {agent?.formal_skills?.length ?? 0} formal skills detected
                 </p>
               )}
             </div>
@@ -154,18 +158,18 @@ function ProfilePage() {
         </div>
 
         {/* ISCO matched role cards from agent response */}
-        {agent?.isco_matched_roles && agent.isco_matched_roles.length > 0 && (
+        {(agent?.isco_matched_roles?.length ?? 0) > 0 && (
           <section className="mt-8">
             <div className="flex items-baseline justify-between">
               <h2 className="font-display text-xl font-semibold tracking-tight">
                 Matched ISCO-08 roles
               </h2>
               <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                {agent.isco_matched_roles.length} roles
+                {agent?.isco_matched_roles?.length ?? 0} roles
               </span>
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {agent.isco_matched_roles.map((role, i) => {
+              {agent?.isco_matched_roles?.map((role, i) => {
                 const pct = Math.round((role.automation_probability ?? 0) * 100);
                 const tone =
                   role.automation_risk_label === "High"
@@ -230,10 +234,10 @@ function ProfilePage() {
         )}
 
         {/* Econometric signals from agent response */}
-        {agent?.econometric_signals && agent.econometric_signals.length > 0 && (
+        {(agent?.econometric_signals?.length ?? 0) > 0 && (
           <div className="mt-8">
             <EconometricSignals
-              signals={agent.econometric_signals}
+              signals={agent?.econometric_signals ?? []}
               title="Econometric signals · ILO ILOSTAT"
             />
           </div>
