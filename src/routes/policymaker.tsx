@@ -3,11 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Download, Filter, Users } from "lucide-react";
-import {
-  AGGREGATE_SUPPLY_DEMAND,
-  REGION_ECONOMETRICS,
-  type Region,
-} from "@/data/passport";
+import { AGGREGATE_SUPPLY_DEMAND, REGION_ECONOMETRICS, type Region } from "@/data/passport";
 import { loadActiveRegion } from "@/lib/profile-store";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -36,11 +32,7 @@ function PolicymakerPage() {
 
   // Auth gate: must be admin OR approved policymaker
   if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-sm text-muted-foreground">
-        Loading…
-      </div>
-    );
+    return <div className="flex min-h-[60vh] items-center justify-center text-sm text-muted-foreground">Loading…</div>;
   }
   if (!user) {
     return (
@@ -50,8 +42,15 @@ function PolicymakerPage() {
           The policymaker dashboard is restricted to approved institutional accounts.
         </p>
         <div className="mt-5 flex justify-center gap-2">
-          <Link to="/auth" className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background">Sign in</Link>
-          <Link to="/signup/policymaker" className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted">Apply</Link>
+          <Link to="/auth" className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background">
+            Sign in
+          </Link>
+          <Link
+            to="/signup/policymaker"
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+          >
+            Apply
+          </Link>
         </div>
       </div>
     );
@@ -65,10 +64,12 @@ function PolicymakerPage() {
       <div className="mx-auto max-w-md px-4 py-20 text-center">
         <h1 className="font-display text-2xl font-semibold">Access restricted</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          This dashboard is for approved policymakers. Apply for access if your institution
-          uses the UNMAPPED.
+          This dashboard is for approved policymakers. Apply for access if your institution uses the UNMAPPED.
         </p>
-        <Link to="/signup/policymaker" className="mt-5 inline-block rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background">
+        <Link
+          to="/signup/policymaker"
+          className="mt-5 inline-block rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background"
+        >
           Apply for access
         </Link>
       </div>
@@ -93,9 +94,7 @@ function PolicymakerPage() {
     lines.push("Section,Skills supply vs. employer demand");
     lines.push("Skill,Supply (%),Demand (%),Gap");
     data.forEach((row) => {
-      lines.push(
-        [escape(row.label), row.supply, row.demand, row.demand - row.supply].join(","),
-      );
+      lines.push([escape(row.label), row.supply, row.demand, row.demand - row.supply].join(","));
     });
     lines.push("");
     lines.push("Section,Econometric signals");
@@ -129,17 +128,15 @@ function PolicymakerPage() {
   return (
     <main className="pb-20">
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12">
-        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          Module 03 · Institutional view
-        </p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Institutional view</p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
               Where supply meets need.
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-              Same data Amara sees — different lens. Designed for program officers building
-              evidence-based interventions.
+              Same data Amara sees — different lens. Designed for program officers building evidence-based
+              interventions.
             </p>
           </div>
           <button
@@ -186,9 +183,7 @@ function PolicymakerPage() {
         <section className="mt-8 rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-display text-xl font-semibold tracking-tight">
-                Skills supply vs. employer demand
-              </h2>
+              <h2 className="font-display text-xl font-semibold tracking-tight">Skills supply vs. employer demand</h2>
               <p className="mt-1 text-xs text-muted-foreground">
                 Aggregated from active profiles + employer postings · {region}
               </p>
@@ -209,12 +204,7 @@ function PolicymakerPage() {
                     <span
                       className="rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider"
                       style={{
-                        background:
-                          gap > 10
-                            ? "var(--risk-high)"
-                            : gap < -10
-                              ? "var(--risk-low)"
-                              : "var(--muted)",
+                        background: gap > 10 ? "var(--risk-high)" : gap < -10 ? "var(--risk-low)" : "var(--muted)",
                         color:
                           gap > 10
                             ? "var(--risk-high-foreground)"
@@ -268,9 +258,7 @@ function PolicymakerPage() {
 function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        {label}
-      </p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
       <p className="mt-2 font-display text-3xl font-semibold tracking-tight">{value}</p>
       <p className="mt-1 text-[11px] text-muted-foreground">{sub}</p>
     </div>
@@ -303,9 +291,7 @@ function Legend({ label, color }: { label: string; color: string }) {
 function SignalCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-surface-ink-foreground/10 bg-surface-ink-foreground/5 p-4">
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">
-        {label}
-      </p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">{label}</p>
       <p className="mt-2 font-display text-base font-semibold leading-snug">{value}</p>
     </div>
   );
@@ -324,9 +310,7 @@ function FilterPill<T extends string>({
 }) {
   return (
     <label className="flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs">
-      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        {label}
-      </span>
+      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
