@@ -323,11 +323,131 @@ function OpportunitiesPage() {
           </div>
         )}
 
-        {/* Admin-posted jobs */}
+        {/* Matched opportunities — based on user skills vs posted jobs */}
+        {!isAdmin && user && matchedJobs.length > 0 && (
+          <>
+            <h2 className="mt-8 font-display text-lg font-semibold tracking-tight">
+              Matched opportunities
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Ranked by overlap between your skills and posted jobs.
+            </p>
+            <div className="mt-3 grid gap-4 md:grid-cols-2">
+              {matchedJobs.map((m, i) => {
+                const oid = `admin-${m.job.id}`;
+                const applied = appliedIds.has(oid);
+                const tone = RISK_TONE[m.riskLevel];
+                return (
+                  <motion.article
+                    key={`match-${m.job.id}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="flex flex-col rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          {m.job.category} · {m.job.company}
+                        </p>
+                        <h3 className="font-display text-base font-semibold leading-tight">
+                          {m.job.title}
+                        </h3>
+                        <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                          <MapPin className="h-3 w-3" /> {m.job.city}, {m.job.country}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Match
+                        </p>
+                        <p className="font-display text-2xl font-semibold leading-none">
+                          {m.matchPercent}%
+                        </p>
+                        <span
+                          className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                          style={{ background: tone.bg, color: tone.fg }}
+                        >
+                          {m.riskLevel} risk
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Match progress bar */}
+                    <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${m.matchPercent}%` }}
+                        transition={{ duration: 0.6, delay: i * 0.05 }}
+                        className="h-full rounded-full"
+                        style={{ background: tone.bg }}
+                      />
+                    </div>
+
+                    {m.matchedSkills.length > 0 && (
+                      <div className="mt-4">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Skills you have
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {m.matchedSkills.map((s) => (
+                            <span
+                              key={s}
+                              className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground"
+                            >
+                              <Check className="h-3 w-3" /> {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {m.missingSkills.length > 0 && (
+                      <div className="mt-3 rounded-2xl border border-dashed border-border bg-background p-3">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Skills you're lacking
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {m.missingSkills.map((g) => (
+                            <span
+                              key={g}
+                              className="rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-medium text-foreground"
+                            >
+                              + {g}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                      <p className="text-xs text-muted-foreground">{m.job.wage_range}</p>
+                      <Button
+                        onClick={() => handleApplyAdminJob(m.job)}
+                        disabled={loading || submittingId === oid || applied}
+                        size="sm"
+                        className="rounded-full"
+                        variant={applied ? "secondary" : "default"}
+                      >
+                        {applied ? (
+                          <><Check className="mr-1 h-3.5 w-3.5" /> Applied</>
+                        ) : (
+                          submittingId === oid ? "Submitting…" : "Apply now"
+                        )}
+                      </Button>
+                    </div>
+                  </motion.article>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* All admin-posted jobs */}
         {visibleAdminJobs.length > 0 && (
           <>
             <h2 className="mt-8 font-display text-lg font-semibold tracking-tight">
-              Posted opportunities
+              All posted opportunities
             </h2>
             <div className="mt-3 grid gap-4 md:grid-cols-2">
               {visibleAdminJobs.map((j, i) => {
