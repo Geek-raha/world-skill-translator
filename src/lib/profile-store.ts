@@ -3,6 +3,7 @@ import { PASSPORTS, type Region, type SkillPassport } from "@/data/passport";
 
 const KEY = "dsp.activeProfile.v1";
 const REGION_KEY = "dsp.activeRegion.v1";
+const AGENT_RESPONSE_KEY = "dsp.agentResponse.v1";
 
 export interface OnboardingDraft {
   country: string;
@@ -52,6 +53,23 @@ export function setActiveRegion(region: Region) {
   if (typeof window === "undefined") return;
   localStorage.setItem(REGION_KEY, region);
   window.dispatchEvent(new CustomEvent("dsp:region", { detail: region }));
+}
+
+/** Persist the raw response from the skill-mapping agent so other pages can read it. */
+export function saveAgentResponse(data: unknown) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(AGENT_RESPONSE_KEY, JSON.stringify(data));
+}
+
+export function loadAgentResponse<T = unknown>(): T | null {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(AGENT_RESPONSE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
 }
 
 /** React hook: returns saved profile, falling back to demo passport for active region. */

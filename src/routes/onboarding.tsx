@@ -12,6 +12,7 @@ import { REGIONS, SETTINGS, getEducationLevels, getRegion } from "@/data/regions
 import {
   DEFAULT_DRAFT,
   notifyProfileChange,
+  saveAgentResponse,
   saveProfile,
   setActiveRegion,
   type OnboardingDraft,
@@ -39,6 +40,9 @@ function OnboardingPage() {
   const [draft, setDraft] = useState<OnboardingDraft>(DEFAULT_DRAFT);
   const [interpreting, setInterpreting] = useState(false);
   const [interpreted, setInterpreted] = useState<string[]>([]);
+  const [mapping, setMapping] = useState(false);
+  const [agentResponse, setAgentResponse] = useState<Record<string, unknown> | null>(null);
+  const [mappingError, setMappingError] = useState<string | null>(null);
 
   const seed = PASSPORTS[draft.region];
 
@@ -52,15 +56,51 @@ function OnboardingPage() {
 
   function next() {
     if (step === 2) {
-      // Simulated AI interpretation — pulls from seed for the chosen region
-      setInterpreting(true);
-      setTimeout(() => {
-        const candidates = seed.formal_skills;
-        setInterpreted(candidates);
-        setDraft((d) => ({ ...d, confirmedSkills: candidates }));
-        setInterpreting(false);
-        setStep(3);
-      }, 900);
+      // Call the skill-mapping agent, persist the response, then jump to the Skills Profile.
+      setMapping(true);
+      setMappingError(null);
+      (async () => {
+        try {
+          const res = await fetch(
+            "https://sofiajeon-unmapped-backend.hf.space/ask-agent",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                informal_text: draft.experience,
+                region: draft.country,
+                config: {
+                  labor_data_source: "ILO ILOSTAT",
+                  taxonomy: "ISCO-08",
+                  language: "English",
+                  automation_model: "Frey-Osborne",
+                },
+              }),
+            }
+          );
+          if (!res.ok) throw new Error(`Request failed (${res.status})`);
+          const data = (await res.json()) as Record<string, unknown>;
+          setAgentResponse(data);
+          saveAgentResponse(data);
+
+          // Persist a passport rooted in the user's actual input so /profile reflects it.
+          const passport: SkillPassport = {
+            ...seed,
+            informal_input: draft.experience || seed.informal_input,
+          };
+          saveProfile(passport);
+          setActiveRegion(draft.region);
+          notifyProfileChange();
+
+          navigate({ to: "/profile" });
+        } catch (err) {
+          setMappingError(
+            err instanceof Error ? err.message : "Could not reach the skills agent."
+          );
+        } finally {
+          setMapping(false);
+        }
+      })();
       return;
     }
     if (step === 3) {
@@ -105,6 +145,27 @@ function OnboardingPage() {
   return (
     <main className="pb-20">
       <div className="mx-auto max-w-2xl px-4 pt-8 sm:px-6 sm:pt-12">
+        {mapping && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background/85 backdrop-blur-sm"
+          >
+            <Loader2 className="h-8 w-8 animate-spin text-foreground" />
+            <p className="font-display text-lg font-semibold">Mapping your skills…</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              Translating your words into ISCO-08
+            </p>
+          </div>
+        )}
+        {mappingError && (
+          <div
+            role="alert"
+            className="mb-4 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          >
+            {mappingError}
+          </div>
+        )}
         {/* Progress */}
         <div className="mb-8 flex items-center gap-1.5">
           {STEPS.map((label, i) => (
@@ -183,14 +244,18 @@ function OnboardingPage() {
             </button>
             <button
               onClick={next}
-              disabled={!canAdvance || interpreting}
+              disabled={!canAdvance || interpreting || mapping}
               className="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold shadow-[var(--shadow-card)] disabled:opacity-40"
               style={{
                 background: "var(--gradient-ink)",
                 color: "var(--surface-ink-foreground)",
               }}
             >
-              {interpreting ? (
+              {mapping ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Mapping your skills…
+                </>
+              ) : interpreting ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 animate-spin" /> Interpreting…
                 </>
