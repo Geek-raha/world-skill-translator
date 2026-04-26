@@ -80,12 +80,22 @@ function OnboardingPage() {
             }
           );
           if (!res.ok) throw new Error(`Request failed (${res.status})`);
-          const data = (await res.json()) as AgentResponse;
+          const raw = (await res.json()) as
+            | AgentResponse
+            | { response: AgentResponse };
           // Surface raw payload so the backend dev can verify shape.
           // eslint-disable-next-line no-console
-          console.log("API Response:", data);
+          console.log("API Response:", raw);
+
+          // The API wraps the payload as { response: {...} }. Unwrap it; fall
+          // back to the raw object for older shapes.
+          const payload: AgentResponse =
+            raw && typeof raw === "object" && "response" in raw && raw.response
+              ? (raw as { response: AgentResponse }).response
+              : (raw as AgentResponse);
+
           // Single source of truth: write into global state (also persists).
-          setAssessmentData(data);
+          setAssessmentData(payload);
 
           // Persist a passport rooted in the user's actual input so /profile reflects it.
           const passport: SkillPassport = {
@@ -96,6 +106,9 @@ function OnboardingPage() {
           setActiveRegion(draft.region);
           notifyProfileChange();
 
+          // Only navigate AFTER the global state has been updated and persisted.
+          // setAssessmentData writes synchronously to localStorage, so /profile
+          // hydrates from it immediately on mount.
           navigate({ to: "/profile" });
         } catch (err) {
           setMappingError(
