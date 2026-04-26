@@ -168,6 +168,79 @@ function OpportunitiesPage() {
     [adminJobs]
   );
 
+  // ── Matched opportunities ──────────────────────────────────────────────
+  // Score each admin job against the user's formal skills (from the agent
+  // assessment). A skill counts as "matched" if it appears as a whole word
+  // inside the job's title / category / description. Missing skills are the
+  // job-derived keywords the user does not yet have. Risk level reflects how
+  // confident the match is.
+  interface MatchedJob {
+    job: AdminJob;
+    matchPercent: number;
+    matchedSkills: string[];
+    missingSkills: string[];
+    riskLevel: "Low" | "Medium" | "High";
+  }
+
+  const matchedJobs = useMemo<MatchedJob[]>(() => {
+    const userSkills = (agent?.formal_skills ?? []).map((s) => s.trim()).filter(Boolean);
+    if (userSkills.length === 0 || adminJobs.length === 0) return [];
+
+    const STOPWORDS = new Set([
+      "and","or","the","a","an","of","for","to","with","in","on","at","by",
+      "is","are","be","as","from","into","via","using","you","we","our","your",
+      "will","can","must","should","this","that","these","those","job","role",
+      "work","experience","required","preferred","strong","good","ability",
+    ]);
+    const tokenize = (text: string): string[] =>
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s+#./-]/g, " ")
+        .split(/\s+/)
+        .map((w) => w.trim())
+        .filter((w) => w.length > 2 && !STOPWORDS.has(w));
+
+    const containsWord = (haystack: string, needle: string) =>
+      new RegExp(`\\b${needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(haystack);
+
+    return adminJobs
+      .map<MatchedJob>((job) => {
+        const haystack = `${job.title} ${job.category} ${job.description ?? ""}`;
+        const jobKeywords = Array.from(new Set(tokenize(haystack)));
+
+        const matched = userSkills.filter((s) => containsWord(haystack, s));
+        const userSkillTokens = new Set(
+          userSkills.flatMap((s) => tokenize(s))
+        );
+        const missing = jobKeywords
+          .filter((k) => !userSkillTokens.has(k))
+          .slice(0, 6)
+          .map((k) => k.charAt(0).toUpperCase() + k.slice(1));
+
+        const denom = Math.max(jobKeywords.length, userSkills.length, 1);
+        const rawPercent = Math.round((matched.length / denom) * 100);
+        // Boost so a few real overlaps still feel meaningful
+        const matchPercent = Math.min(
+          100,
+          matched.length === 0 ? 0 : Math.max(rawPercent, matched.length * 18)
+        );
+
+        const riskLevel: MatchedJob["riskLevel"] =
+          matchPercent >= 65 ? "Low" : matchPercent >= 35 ? "Medium" : "High";
+
+        return { job, matchPercent, matchedSkills: matched, missingSkills: missing, riskLevel };
+      })
+      .filter((m) => m.matchPercent > 0)
+      .sort((a, b) => b.matchPercent - a.matchPercent)
+      .slice(0, 6);
+  }, [agent?.formal_skills, adminJobs]);
+
+  const RISK_TONE: Record<MatchedJob["riskLevel"], { bg: string; fg: string }> = {
+    Low: { bg: "var(--risk-low)", fg: "var(--risk-low-foreground)" },
+    Medium: { bg: "var(--risk-medium)", fg: "var(--risk-medium-foreground)" },
+    High: { bg: "var(--risk-high)", fg: "var(--risk-high-foreground)" },
+  };
+
   return (
     <main className="pb-20">
       <div className="mx-auto max-w-5xl px-4 pt-8 sm:px-6 sm:pt-12">
@@ -250,11 +323,131 @@ function OpportunitiesPage() {
           </div>
         )}
 
-        {/* Admin-posted jobs */}
+        {/* Matched opportunities — based on user skills vs posted jobs */}
+        {!isAdmin && user && matchedJobs.length > 0 && (
+          <>
+            <h2 className="mt-8 font-display text-lg font-semibold tracking-tight">
+              Matched opportunities
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Ranked by overlap between your skills and posted jobs.
+            </p>
+            <div className="mt-3 grid gap-4 md:grid-cols-2">
+              {matchedJobs.map((m, i) => {
+                const oid = `admin-${m.job.id}`;
+                const applied = appliedIds.has(oid);
+                const tone = RISK_TONE[m.riskLevel];
+                return (
+                  <motion.article
+                    key={`match-${m.job.id}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="flex flex-col rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          {m.job.category} · {m.job.company}
+                        </p>
+                        <h3 className="font-display text-base font-semibold leading-tight">
+                          {m.job.title}
+                        </h3>
+                        <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                          <MapPin className="h-3 w-3" /> {m.job.city}, {m.job.country}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Match
+                        </p>
+                        <p className="font-display text-2xl font-semibold leading-none">
+                          {m.matchPercent}%
+                        </p>
+                        <span
+                          className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                          style={{ background: tone.bg, color: tone.fg }}
+                        >
+                          {m.riskLevel} risk
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Match progress bar */}
+                    <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${m.matchPercent}%` }}
+                        transition={{ duration: 0.6, delay: i * 0.05 }}
+                        className="h-full rounded-full"
+                        style={{ background: tone.bg }}
+                      />
+                    </div>
+
+                    {m.matchedSkills.length > 0 && (
+                      <div className="mt-4">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Skills you have
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {m.matchedSkills.map((s) => (
+                            <span
+                              key={s}
+                              className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground"
+                            >
+                              <Check className="h-3 w-3" /> {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {m.missingSkills.length > 0 && (
+                      <div className="mt-3 rounded-2xl border border-dashed border-border bg-background p-3">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Skills you're lacking
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {m.missingSkills.map((g) => (
+                            <span
+                              key={g}
+                              className="rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-medium text-foreground"
+                            >
+                              + {g}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                      <p className="text-xs text-muted-foreground">{m.job.wage_range}</p>
+                      <Button
+                        onClick={() => handleApplyAdminJob(m.job)}
+                        disabled={loading || submittingId === oid || applied}
+                        size="sm"
+                        className="rounded-full"
+                        variant={applied ? "secondary" : "default"}
+                      >
+                        {applied ? (
+                          <><Check className="mr-1 h-3.5 w-3.5" /> Applied</>
+                        ) : (
+                          submittingId === oid ? "Submitting…" : "Apply now"
+                        )}
+                      </Button>
+                    </div>
+                  </motion.article>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* All admin-posted jobs */}
         {visibleAdminJobs.length > 0 && (
           <>
             <h2 className="mt-8 font-display text-lg font-semibold tracking-tight">
-              Posted opportunities
+              All posted opportunities
             </h2>
             <div className="mt-3 grid gap-4 md:grid-cols-2">
               {visibleAdminJobs.map((j, i) => {
