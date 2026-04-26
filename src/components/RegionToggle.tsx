@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import type { Region } from "@/data/passport";
-
-const REGIONS: Region[] = ["Sub-Saharan Africa", "South Asia"];
+import { REGION_NAMES } from "@/data/regions";
 
 interface Props {
   value: Region;
@@ -12,7 +11,7 @@ export function RegionToggle({ value, onChange }: Props) {
   return (
     <div className="rounded-full border border-border bg-card/60 p-1 shadow-[var(--shadow-card)] backdrop-blur">
       <div className="relative grid grid-cols-2 gap-1">
-        {REGIONS.map((region) => {
+        {REGION_NAMES.map((region) => {
           const active = region === value;
           return (
             <button

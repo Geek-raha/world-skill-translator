@@ -8,6 +8,7 @@ import {
   type Region,
   type SkillPassport,
 } from "@/data/passport";
+import { REGIONS } from "@/data/regions";
 import {
   DEFAULT_DRAFT,
   notifyProfileChange,
@@ -29,11 +30,6 @@ export const Route = createFileRoute("/onboarding")({
   }),
   component: OnboardingPage,
 });
-
-const REGIONS: { region: Region; country: string; flag: string; sub: string }[] = [
-  { region: "Sub-Saharan Africa", country: "Ghana", flag: "🇬🇭", sub: "Accra · English" },
-  { region: "South Asia", country: "Bangladesh", flag: "🇧🇩", sub: "Dhaka · Bangla / English" },
-];
 
 const EDUCATION_BY_REGION: Record<Region, string[]> = {
   "Sub-Saharan Africa": [
@@ -248,15 +244,15 @@ function ContextStep({
 
       <div className="grid gap-3 sm:grid-cols-2">
         {REGIONS.map((r) => {
-          const active = draft.region === r.region;
-          const cfg = COUNTRY_CONFIGS[r.region];
+          const active = draft.region === r.name;
+          const cfg = COUNTRY_CONFIGS[r.name];
           return (
             <button
-              key={r.region}
+              key={r.name}
               onClick={() =>
                 onChange({
-                  region: r.region,
-                  country: r.country,
+                  region: r.name,
+                  country: r.defaultCountry,
                   language: cfg.language,
                 })
               }
@@ -271,14 +267,40 @@ function ContextStep({
                 <span className="text-2xl">{r.flag}</span>
                 {active && <Check className="h-4 w-4" />}
               </div>
-              <p className="mt-3 font-display text-base font-semibold">{r.country}</p>
-              <p className="text-xs opacity-70">{r.region}</p>
+              <p className="mt-3 font-display text-base font-semibold">{r.defaultCountry}</p>
+              <p className="text-xs opacity-70">{r.name}</p>
               <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] opacity-60">
                 {r.sub}
               </p>
             </button>
           );
         })}
+      </div>
+
+      <div>
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          Country
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {REGIONS.find((r) => r.name === draft.region)?.countries.map((c) => {
+            const active = draft.country === c.name;
+            return (
+              <button
+                key={c.name}
+                onClick={() => onChange({ country: c.name, language: c.language })}
+                className="rounded-full border px-3 py-1.5 text-xs font-medium transition-colors"
+                style={{
+                  background: active ? "var(--surface-ink)" : "var(--card)",
+                  color: active ? "var(--surface-ink-foreground)" : "var(--foreground)",
+                  borderColor: active ? "var(--surface-ink)" : "var(--border)",
+                }}
+              >
+                <span className="mr-1">{c.flag}</span>
+                {c.name}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div>
