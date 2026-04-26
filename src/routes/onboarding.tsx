@@ -8,7 +8,7 @@ import {
   type Region,
   type SkillPassport,
 } from "@/data/passport";
-import { REGIONS } from "@/data/regions";
+import { REGIONS, SETTINGS, getEducationLevels, getRegion } from "@/data/regions";
 import {
   DEFAULT_DRAFT,
   notifyProfileChange,
@@ -30,23 +30,6 @@ export const Route = createFileRoute("/onboarding")({
   }),
   component: OnboardingPage,
 });
-
-const EDUCATION_BY_REGION: Record<Region, string[]> = {
-  "Sub-Saharan Africa": [
-    "Did not complete BECE",
-    "BECE (basic school)",
-    "SHS / Vocational",
-    "Tertiary (Polytechnic / University)",
-    "Self-taught / informal apprenticeship",
-  ],
-  "South Asia": [
-    "Below SSC",
-    "SSC (secondary)",
-    "HSC (higher secondary)",
-    "Tertiary (College / University)",
-    "Self-taught / informal apprenticeship",
-  ],
-};
 
 const STEPS = ["Context", "Education", "Experience", "Confirm", "Passport"] as const;
 
@@ -308,7 +291,7 @@ function ContextStep({
           Setting
         </p>
         <div className="grid grid-cols-2 gap-2">
-          {(["Urban", "Rural"] as const).map((s) => {
+          {SETTINGS.map((s) => {
             const active = draft.setting === s;
             return (
               <button
@@ -340,7 +323,8 @@ function EducationStep({
   value: string;
   onChange: (v: string) => void;
 }) {
-  const options = EDUCATION_BY_REGION[region];
+  const options = getEducationLevels(region);
+  const taxonomyLabel = getRegion(region).educationTaxonomyLabel;
   return (
     <div className="space-y-6">
       <div>
@@ -348,8 +332,7 @@ function EducationStep({
           What's your education background?
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Mapped to the {region === "Sub-Saharan Africa" ? "Ghana NQF" : "Bangladesh NQF"} —
-          not a Western equivalent.
+          Mapped to the {taxonomyLabel} — not a Western equivalent.
         </p>
       </div>
 
