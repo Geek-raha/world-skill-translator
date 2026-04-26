@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Briefcase, Download, Edit3, ExternalLink, Info, Share2 } from "lucide-react";
+import { Briefcase, Download, Edit3, ExternalLink, Share2 } from "lucide-react";
 import type { SkillCategory } from "@/data/passport";
-import { useState } from "react";
 import { EconometricSignals } from "@/components/EconometricSignals";
 import { useAssessment } from "@/context/AssessmentContext";
 import { NoAssessmentData } from "@/components/NoAssessmentData";
@@ -29,7 +28,6 @@ const CATEGORY_LABEL: Record<SkillCategory, string> = {
 
 function ProfilePage() {
   const { data: agent } = useAssessment();
-  const [, setOpenTip] = useState<string | null>(null);
 
   // Strict: pages render from global state only. No demo fallback.
   if (!agent) {
