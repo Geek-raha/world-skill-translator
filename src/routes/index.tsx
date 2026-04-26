@@ -175,64 +175,42 @@ function LandingPage() {
           </div>
 
           <div
-            className="neon-frame aurora-bg grid-overlay relative overflow-hidden rounded-3xl border border-border p-6 shadow-[var(--shadow-elevated)]"
+            className="relative overflow-hidden rounded-3xl border border-border p-6 shadow-[var(--shadow-elevated)]"
             style={{ background: "var(--gradient-ink)", color: "var(--surface-ink-foreground)" }}
           >
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -top-16 -right-12 h-44 w-44 rounded-full blur-3xl animate-aurora"
-              style={{ background: "color-mix(in oklab, var(--neon-cyan) 50%, transparent)" }}
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -bottom-20 -left-10 h-52 w-52 rounded-full blur-3xl animate-aurora"
-              style={{ background: "color-mix(in oklab, var(--neon-violet) 45%, transparent)" }}
-            />
-            <div className="relative flex items-center justify-between">
+            <div className="flex items-center justify-between">
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-surface-ink-foreground/60">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span
-                      className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-neon-pulse"
-                      style={{ background: "var(--neon-cyan)" }}
-                    />
-                    <span
-                      className="relative inline-flex h-1.5 w-1.5 rounded-full"
-                      style={{ background: "var(--neon-cyan)" }}
-                    />
-                  </span>
-                  Live demo signal
-                </span>
+                Live demo signal
               </p>
               <Globe2 className="h-4 w-4 text-surface-ink-foreground/60" />
             </div>
-            <p className="relative mt-3 font-display text-2xl font-semibold leading-tight">
+            <p className="mt-3 font-display text-2xl font-semibold leading-tight">
               "I fix broken phone screens and watch python tutorials on YouTube."
             </p>
-            <div className="relative mt-6 flex flex-wrap gap-2">
+            <div className="mt-6 flex flex-wrap gap-2">
               {["Hardware Diagnostics", "Python Scripting", "Customer Triage"].map((s) => (
                 <span
                   key={s}
-                  className="rounded-full border border-surface-ink-foreground/20 bg-surface-ink-foreground/5 px-3 py-1 text-xs transition-colors hover:border-[color:var(--neon-cyan)] hover:text-[color:var(--neon-cyan)]"
+                  className="rounded-full border border-surface-ink-foreground/20 bg-surface-ink-foreground/5 px-3 py-1 text-xs"
                 >
                   {s}
                 </span>
               ))}
             </div>
-            <div className="relative mt-6 grid grid-cols-3 gap-3">
-              <div className="rounded-2xl bg-surface-ink-foreground/5 p-3 transition-shadow hover:shadow-[var(--glow-cyan)]">
+            <div className="mt-6 grid grid-cols-3 gap-3">
+              <div className="rounded-2xl bg-surface-ink-foreground/5 p-3">
                 <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">
                   ISCO match
                 </p>
                 <p className="mt-1 font-display text-lg font-semibold">3512</p>
               </div>
-              <div className="rounded-2xl bg-surface-ink-foreground/5 p-3 transition-shadow hover:shadow-[var(--glow-violet)]">
+              <div className="rounded-2xl bg-surface-ink-foreground/5 p-3">
                 <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">
                   Risk
                 </p>
                 <p className="mt-1 font-display text-lg font-semibold">Medium</p>
               </div>
-              <div className="rounded-2xl bg-surface-ink-foreground/5 p-3 transition-shadow hover:shadow-[0_0_0_1px_color-mix(in_oklab,var(--neon-magenta)_35%,transparent),0_8px_32px_-6px_color-mix(in_oklab,var(--neon-magenta)_45%,transparent)]">
+              <div className="rounded-2xl bg-surface-ink-foreground/5 p-3">
                 <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">
                   Sector
                 </p>
@@ -258,11 +236,11 @@ function LandingPage() {
             <Link
               key={f.step}
               to={f.href}
-              className="group neon-frame lift-on-hover shine flex flex-col rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+              className="group flex flex-col rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-elevated)]"
             >
               <div className="flex items-center justify-between">
                 <span
-                  className="flex h-9 w-9 items-center justify-center rounded-xl shadow-[var(--glow-cyan)] transition-transform group-hover:scale-110 group-hover:rotate-3"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl"
                   style={{ background: "var(--gradient-ink)", color: "var(--surface-ink-foreground)" }}
                 >
                   <f.icon className="h-4 w-4" />
@@ -271,7 +249,7 @@ function LandingPage() {
                   Step {f.step}
                 </span>
               </div>
-              <h3 className="mt-4 font-display text-xl font-semibold tracking-tight transition-colors group-hover:text-[color:var(--neon-violet)]">{f.title}</h3>
+              <h3 className="mt-4 font-display text-xl font-semibold tracking-tight">{f.title}</h3>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
             </Link>
           ))}
