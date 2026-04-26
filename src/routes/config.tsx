@@ -8,7 +8,7 @@ import { loadActiveRegion, setActiveRegion } from "@/lib/profile-store";
 export const Route = createFileRoute("/config")({
   head: () => ({
     meta: [
-      { title: "Country configuration — Digital Skill Passport" },
+      { title: "Country configuration — UNMAPPED" },
       {
         name: "description",
         content:

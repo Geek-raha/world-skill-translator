@@ -7,7 +7,7 @@ import type { ProfileSkill, SkillBucket } from "@/data/passport";
 export const Route = createFileRoute("/readiness")({
   head: () => ({
     meta: [
-      { title: "AI Readiness — Digital Skill Passport" },
+      { title: "AI Readiness — UNMAPPED" },
       {
         name: "description",
         content:

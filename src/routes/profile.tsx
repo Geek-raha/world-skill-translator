@@ -8,7 +8,7 @@ import { useState } from "react";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Skills Profile — Digital Skill Passport" },
+      { title: "Skills Profile — UNMAPPED" },
       {
         name: "description",
         content:

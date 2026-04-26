@@ -26,7 +26,7 @@ interface AdminJob {
 export const Route = createFileRoute("/opportunities")({
   head: () => ({
     meta: [
-      { title: "Opportunities — Digital Skill Passport" },
+      { title: "Opportunities — UNMAPPED" },
       {
         name: "description",
         content:

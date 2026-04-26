@@ -19,7 +19,7 @@ import {
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
-      { title: "Onboarding — Digital Skill Passport" },
+      { title: "Onboarding — UNMAPPED" },
       {
         name: "description",
         content:
@@ -525,7 +525,7 @@ function PassportStep({
       >
         <div className="border-b border-surface-ink-foreground/10 p-5">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-surface-ink-foreground/60">
-            Digital Skill Passport · {draft.country}
+            UNMAPPED · {draft.country}
           </p>
           <p className="mt-2 font-display text-2xl font-semibold">
             {draft.educationLevel || "—"}

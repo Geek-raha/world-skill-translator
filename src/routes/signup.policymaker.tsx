@@ -7,7 +7,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/signup/policymaker")({
   head: () => ({
     meta: [
-      { title: "Policymaker signup — Digital Skill Passport" },
+      { title: "Policymaker signup — UNMAPPED" },
       { name: "description", content: "Apply for a policymaker account. Approval required." },
     ],
   }),
