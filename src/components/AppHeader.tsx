@@ -49,8 +49,13 @@ export function AppHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link to="/" className="flex items-center gap-2">
           <span
-            className="flex h-8 w-8 items-center justify-center rounded-lg font-display text-sm font-bold"
-            style={{ background: "var(--gradient-ink)", color: "var(--surface-ink-foreground)" }}
+            className="flex h-9 w-9 items-center justify-center rounded-full font-display text-sm font-bold ring-1 ring-offset-2 ring-offset-background"
+            style={{
+              background: "var(--gradient-ink)",
+              color: "var(--surface-ink-foreground)",
+              boxShadow: "var(--shadow-stamp)",
+              ["--tw-ring-color" as never]: "color-mix(in oklab, var(--surface-ink) 30%, transparent)",
+            }}
           >
             U
           </span>
