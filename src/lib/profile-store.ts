@@ -59,6 +59,7 @@ export function setActiveRegion(region: Region) {
 export function saveAgentResponse(data: unknown) {
   if (typeof window === "undefined") return;
   localStorage.setItem(AGENT_RESPONSE_KEY, JSON.stringify(data));
+  window.dispatchEvent(new CustomEvent("dsp:agent-response", { detail: data }));
 }
 
 export function loadAgentResponse<T = unknown>(): T | null {
