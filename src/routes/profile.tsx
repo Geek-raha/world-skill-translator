@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Download, Edit3, ExternalLink, Info, Share2 } from "lucide-react";
+import { Briefcase, Download, Edit3, ExternalLink, Info, Share2 } from "lucide-react";
 import { useActiveProfile } from "@/lib/profile-store";
 import type { ProfileSkill, SkillCategory } from "@/data/passport";
 import { useState } from "react";
+import { useAgentResponse } from "@/lib/agent-response";
+import { EconometricSignals } from "@/components/EconometricSignals";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -33,6 +35,7 @@ const BUCKET_TONE: Record<ProfileSkill["bucket"], { dot: string; label: string }
 
 function ProfilePage() {
   const { passport, isCustom } = useActiveProfile();
+  const agent = useAgentResponse();
   const [openTip, setOpenTip] = useState<string | null>(null);
 
   const grouped: Record<SkillCategory, ProfileSkill[]> = {
@@ -41,6 +44,9 @@ function ProfilePage() {
     entrepreneurial: [],
   };
   for (const s of passport.skills) grouped[s.category].push(s);
+
+  // If we have a fresh agent response, prefer its category groupings (plain strings).
+  const agentGrouped = agent?.skills_by_category;
 
   function copyShareLink() {
     if (typeof window === "undefined") return;
@@ -122,7 +128,12 @@ function ProfilePage() {
 
         {/* Visual map */}
         <div className="mt-8 grid gap-5 lg:grid-cols-3">
-          {(Object.keys(grouped) as SkillCategory[]).map((cat) => (
+          {(Object.keys(grouped) as SkillCategory[]).map((cat) => {
+            const agentSkills = agentGrouped?.[cat] ?? [];
+            const passportSkills = grouped[cat];
+            const useAgent = agentSkills.length > 0;
+            const count = useAgent ? agentSkills.length : passportSkills.length;
+            return (
             <section
               key={cat}
               className="rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
@@ -132,16 +143,27 @@ function ProfilePage() {
                   {CATEGORY_LABEL[cat]}
                 </h2>
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {grouped[cat].length}
+                  {count}
                 </span>
               </div>
               <ul className="mt-4 space-y-3">
-                {grouped[cat].length === 0 ? (
+                {count === 0 ? (
                   <li className="text-xs italic text-muted-foreground">
                     No skills in this category yet.
                   </li>
+                ) : useAgent ? (
+                  agentSkills.map((name) => (
+                    <li
+                      key={name}
+                      className="rounded-2xl border border-border/70 bg-surface-paper p-3"
+                    >
+                      <p className="font-display text-sm font-semibold leading-snug">
+                        {name}
+                      </p>
+                    </li>
+                  ))
                 ) : (
-                  grouped[cat].map((s) => (
+                  passportSkills.map((s) => (
                     <li
                       key={s.name}
                       className="rounded-2xl border border-border/70 bg-surface-paper p-3"
@@ -180,8 +202,95 @@ function ProfilePage() {
                 )}
               </ul>
             </section>
-          ))}
+            );
+          })}
         </div>
+
+        {/* ISCO matched role cards from agent response */}
+        {agent?.isco_matched_roles && agent.isco_matched_roles.length > 0 && (
+          <section className="mt-8">
+            <div className="flex items-baseline justify-between">
+              <h2 className="font-display text-xl font-semibold tracking-tight">
+                Matched ISCO-08 roles
+              </h2>
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                {agent.isco_matched_roles.length} roles
+              </span>
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {agent.isco_matched_roles.map((role, i) => {
+                const pct = Math.round((role.automation_probability ?? 0) * 100);
+                const tone =
+                  role.automation_risk_label === "High"
+                    ? { bg: "var(--risk-high)", fg: "var(--risk-high-foreground)" }
+                    : role.automation_risk_label === "Medium"
+                    ? { bg: "var(--risk-medium)", fg: "var(--risk-medium-foreground)" }
+                    : { bg: "var(--risk-low)", fg: "var(--risk-low-foreground)" };
+                return (
+                  <motion.article
+                    key={`${role.isco_code}-${i}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="flex h-9 w-9 items-center justify-center rounded-xl"
+                          style={{ background: "var(--gradient-ink)", color: "var(--surface-ink-foreground)" }}
+                        >
+                          <Briefcase className="h-4 w-4" />
+                        </span>
+                        <div>
+                          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                            ISCO {role.isco_code}
+                          </p>
+                          <h3 className="font-display text-base font-semibold leading-tight">
+                            {role.title}
+                          </h3>
+                        </div>
+                      </div>
+                      <span
+                        className="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider"
+                        style={{ background: tone.bg, color: tone.fg }}
+                      >
+                        {role.automation_risk_label}
+                      </span>
+                    </div>
+                    <div className="mt-4">
+                      <div className="flex items-baseline justify-between">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Automation probability
+                        </p>
+                        <p className="font-display text-sm font-semibold">{pct}%</p>
+                      </div>
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                          style={{ background: tone.bg }}
+                          className="h-full"
+                        />
+                      </div>
+                    </div>
+                  </motion.article>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Econometric signals from agent response */}
+        {agent?.econometric_signals && agent.econometric_signals.length > 0 && (
+          <div className="mt-8">
+            <EconometricSignals
+              signals={agent.econometric_signals}
+              title="Econometric signals · ILO ILOSTAT"
+            />
+          </div>
+        )}
 
         {/* Next steps */}
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
