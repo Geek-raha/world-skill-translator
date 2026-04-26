@@ -26,7 +26,7 @@ function ReadinessPage() {
     return <NoAssessmentData pageLabel="Module 02 · AI Readiness" />;
   }
 
-  const riskLevel = agent.automation_risk_level;
+  const riskLevel = agent?.automation_risk_level;
   const gaugePosition = riskLevel === "Low" ? 16 : riskLevel === "Medium" ? 50 : 84;
   const gaugeTone =
     riskLevel === "High"
@@ -35,7 +35,7 @@ function ReadinessPage() {
       ? { bg: "var(--risk-medium)", fg: "var(--risk-medium-foreground)", label: "Mixed exposure" }
       : { bg: "var(--risk-low)", fg: "var(--risk-low-foreground)", label: "Resilient" };
 
-  const roles = agent.isco_matched_roles ?? [];
+  const roles = agent?.isco_matched_roles ?? [];
 
   return (
     <main className="pb-20">
@@ -69,7 +69,7 @@ function ReadinessPage() {
                 className="rounded-full px-3 py-1 text-xs font-semibold"
                 style={{ background: gaugeTone.bg, color: gaugeTone.fg }}
               >
-                {riskLevel}
+                {riskLevel ?? "Unknown"}
               </span>
             </div>
             <div className="space-y-2">
@@ -172,10 +172,10 @@ function ReadinessPage() {
         )}
 
         {/* Econometric signals from the API */}
-        {agent.econometric_signals && agent.econometric_signals.length > 0 && (
+        {(agent?.econometric_signals?.length ?? 0) > 0 && (
           <div className="mt-8">
             <EconometricSignals
-              signals={agent.econometric_signals}
+              signals={agent?.econometric_signals ?? []}
               title="Econometric signals · ILO ILOSTAT"
             />
           </div>
