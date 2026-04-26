@@ -8,6 +8,7 @@ import {
   type Region,
   type SkillPassport,
 } from "@/data/passport";
+import { REGIONS } from "@/data/regions";
 import {
   DEFAULT_DRAFT,
   notifyProfileChange,
@@ -29,11 +30,6 @@ export const Route = createFileRoute("/onboarding")({
   }),
   component: OnboardingPage,
 });
-
-const REGIONS: { region: Region; country: string; flag: string; sub: string }[] = [
-  { region: "Sub-Saharan Africa", country: "Ghana", flag: "🇬🇭", sub: "Accra · English" },
-  { region: "South Asia", country: "Bangladesh", flag: "🇧🇩", sub: "Dhaka · Bangla / English" },
-];
 
 const EDUCATION_BY_REGION: Record<Region, string[]> = {
   "Sub-Saharan Africa": [
