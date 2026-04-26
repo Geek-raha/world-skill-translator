@@ -154,7 +154,7 @@ function LandingPage() {
               </Link>
               <Link
                 to="/auth"
-                className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+                className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-white hover:text-foreground"
               >
                 Already have an account? Sign in
               </Link>
