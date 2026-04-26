@@ -116,7 +116,7 @@ function LandingPage() {
 
         <div className="mx-auto grid max-w-6xl gap-10 px-4 pt-10 sm:px-6 sm:pt-16 lg:grid-cols-[1.2fr_1fr] lg:items-end">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/80">
               Module 01–03 · Country-agnostic
             </p>
             <h1 className="mt-3 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
