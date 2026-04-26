@@ -48,11 +48,11 @@ export function AppHeader() {
             className="flex h-8 w-8 items-center justify-center rounded-lg font-display text-sm font-bold"
             style={{ background: "var(--gradient-ink)", color: "var(--surface-ink-foreground)" }}
           >
-            D
+            U
           </span>
           <span className="leading-tight">
             <span className="block font-display text-sm font-semibold tracking-tight">
-              Digital Skill Passport
+              UNMAPPED
             </span>
             <span className="block font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
               {region}

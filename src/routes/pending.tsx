@@ -6,7 +6,7 @@ import { AuthCard } from "@/components/AuthCard";
 export const Route = createFileRoute("/pending")({
   head: () => ({
     meta: [
-      { title: "Pending approval — Digital Skill Passport" },
+      { title: "Pending approval — UNMAPPED" },
       { name: "description", content: "Your policymaker account is awaiting admin approval." },
     ],
   }),

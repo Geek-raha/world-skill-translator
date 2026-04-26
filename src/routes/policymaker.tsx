@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/use-auth";
 export const Route = createFileRoute("/policymaker")({
   head: () => ({
     meta: [
-      { title: "Policymaker dashboard — Digital Skill Passport" },
+      { title: "Policymaker dashboard — UNMAPPED" },
       {
         name: "description",
         content:
@@ -66,7 +66,7 @@ function PolicymakerPage() {
         <h1 className="font-display text-2xl font-semibold">Access restricted</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           This dashboard is for approved policymakers. Apply for access if your institution
-          uses the Digital Skill Passport.
+          uses the UNMAPPED.
         </p>
         <Link to="/signup/policymaker" className="mt-5 inline-block rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background">
           Apply for access

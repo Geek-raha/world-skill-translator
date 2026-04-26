@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
-      { title: "My Account — Digital Skill Passport" },
+      { title: "My Account — UNMAPPED" },
       {
         name: "description",
         content:

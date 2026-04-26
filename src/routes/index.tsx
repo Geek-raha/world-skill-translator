@@ -5,13 +5,13 @@ import { useAuth } from "@/hooks/use-auth";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Digital Skill Passport — Labor intelligence for everyone" },
+      { title: "UNMAPPED — Labor intelligence for everyone" },
       {
         name: "description",
         content:
           "Translate informal experience into globally legible credentials. Country-agnostic infrastructure aligned to ISCO-08, ILOSTAT, and Wittgenstein Centre projections.",
       },
-      { property: "og:title", content: "Digital Skill Passport" },
+      { property: "og:title", content: "UNMAPPED" },
       {
         property: "og:description",
         content:

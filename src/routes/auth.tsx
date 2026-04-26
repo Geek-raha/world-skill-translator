@@ -8,8 +8,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Digital Skill Passport" },
-      { name: "description", content: "Sign in to your Digital Skill Passport account." },
+      { title: "Sign in — UNMAPPED" },
+      { name: "description", content: "Sign in to your UNMAPPED account." },
     ],
   }),
   component: SignInPage,

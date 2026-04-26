@@ -8,8 +8,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/signup/youth")({
   head: () => ({
     meta: [
-      { title: "Youth signup — Digital Skill Passport" },
-      { name: "description", content: "Create a youth account to build your Digital Skill Passport." },
+      { title: "Youth signup — UNMAPPED" },
+      { name: "description", content: "Create a youth account to build your UNMAPPED." },
     ],
   }),
   component: YouthSignup,
