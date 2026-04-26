@@ -184,18 +184,40 @@ function OnboardingPage() {
           </div>
         )}
         {/* Progress */}
-        <div className="mb-8 flex items-center gap-1.5">
-          {STEPS.map((label, i) => (
-            <div key={label} className="flex flex-1 items-center gap-1.5">
-              <div
-                className="h-1.5 flex-1 rounded-full transition-colors"
-                style={{
-                  background:
-                    i <= step ? "var(--surface-ink)" : "color-mix(in oklab, var(--border) 70%, transparent)",
-                }}
-              />
-            </div>
-          ))}
+        <div className="mb-8 flex items-center gap-2">
+          {STEPS.map((label, i) => {
+            const reached = i <= step;
+            const current = i === step;
+            return (
+              <div key={label} className="flex flex-1 items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 font-mono text-[10px] font-semibold transition-all"
+                  style={{
+                    borderColor: reached
+                      ? "var(--surface-ink)"
+                      : "color-mix(in oklab, var(--border) 80%, transparent)",
+                    background: reached ? "var(--surface-ink)" : "transparent",
+                    color: reached ? "var(--surface-ink-foreground)" : "var(--muted-foreground)",
+                    transform: current ? "rotate(-6deg) scale(1.05)" : "rotate(-6deg)",
+                    boxShadow: reached ? "var(--shadow-stamp)" : "none",
+                  }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                {i < STEPS.length - 1 && (
+                  <div
+                    className="h-px flex-1"
+                    style={{
+                      background: reached
+                        ? "var(--surface-ink)"
+                        : "color-mix(in oklab, var(--border) 70%, transparent)",
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
