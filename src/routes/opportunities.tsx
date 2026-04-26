@@ -168,6 +168,79 @@ function OpportunitiesPage() {
     [adminJobs]
   );
 
+  // ── Matched opportunities ──────────────────────────────────────────────
+  // Score each admin job against the user's formal skills (from the agent
+  // assessment). A skill counts as "matched" if it appears as a whole word
+  // inside the job's title / category / description. Missing skills are the
+  // job-derived keywords the user does not yet have. Risk level reflects how
+  // confident the match is.
+  interface MatchedJob {
+    job: AdminJob;
+    matchPercent: number;
+    matchedSkills: string[];
+    missingSkills: string[];
+    riskLevel: "Low" | "Medium" | "High";
+  }
+
+  const matchedJobs = useMemo<MatchedJob[]>(() => {
+    const userSkills = (agent?.formal_skills ?? []).map((s) => s.trim()).filter(Boolean);
+    if (userSkills.length === 0 || adminJobs.length === 0) return [];
+
+    const STOPWORDS = new Set([
+      "and","or","the","a","an","of","for","to","with","in","on","at","by",
+      "is","are","be","as","from","into","via","using","you","we","our","your",
+      "will","can","must","should","this","that","these","those","job","role",
+      "work","experience","required","preferred","strong","good","ability",
+    ]);
+    const tokenize = (text: string): string[] =>
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s+#./-]/g, " ")
+        .split(/\s+/)
+        .map((w) => w.trim())
+        .filter((w) => w.length > 2 && !STOPWORDS.has(w));
+
+    const containsWord = (haystack: string, needle: string) =>
+      new RegExp(`\\b${needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(haystack);
+
+    return adminJobs
+      .map<MatchedJob>((job) => {
+        const haystack = `${job.title} ${job.category} ${job.description ?? ""}`;
+        const jobKeywords = Array.from(new Set(tokenize(haystack)));
+
+        const matched = userSkills.filter((s) => containsWord(haystack, s));
+        const userSkillTokens = new Set(
+          userSkills.flatMap((s) => tokenize(s))
+        );
+        const missing = jobKeywords
+          .filter((k) => !userSkillTokens.has(k))
+          .slice(0, 6)
+          .map((k) => k.charAt(0).toUpperCase() + k.slice(1));
+
+        const denom = Math.max(jobKeywords.length, userSkills.length, 1);
+        const rawPercent = Math.round((matched.length / denom) * 100);
+        // Boost so a few real overlaps still feel meaningful
+        const matchPercent = Math.min(
+          100,
+          matched.length === 0 ? 0 : Math.max(rawPercent, matched.length * 18)
+        );
+
+        const riskLevel: MatchedJob["riskLevel"] =
+          matchPercent >= 65 ? "Low" : matchPercent >= 35 ? "Medium" : "High";
+
+        return { job, matchPercent, matchedSkills: matched, missingSkills: missing, riskLevel };
+      })
+      .filter((m) => m.matchPercent > 0)
+      .sort((a, b) => b.matchPercent - a.matchPercent)
+      .slice(0, 6);
+  }, [agent?.formal_skills, adminJobs]);
+
+  const RISK_TONE: Record<MatchedJob["riskLevel"], { bg: string; fg: string }> = {
+    Low: { bg: "var(--risk-low)", fg: "var(--risk-low-foreground)" },
+    Medium: { bg: "var(--risk-medium)", fg: "var(--risk-medium-foreground)" },
+    High: { bg: "var(--risk-high)", fg: "var(--risk-high-foreground)" },
+  };
+
   return (
     <main className="pb-20">
       <div className="mx-auto max-w-5xl px-4 pt-8 sm:px-6 sm:pt-12">
