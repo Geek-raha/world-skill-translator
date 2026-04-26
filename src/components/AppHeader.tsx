@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X, LogOut, Shield, User as UserIcon, UserCircle } from "lucide-react";
 import { loadActiveRegion } from "@/lib/profile-store";
@@ -16,9 +16,13 @@ const NAV = [
 
 export function AppHeader() {
   const { location } = useRouterState();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [region, setRegion] = useState<Region>("Sub-Saharan Africa");
   const { user, profile, hasRole, signOut } = useAuth();
+  const handleSignOut = () => {
+    signOut().then(() => navigate({ to: "/" }));
+  };
   const isAdmin = hasRole("admin");
   const visibleNav = NAV.filter((item) => !(isAdmin && item.hideForAdmin));
 
@@ -99,7 +103,7 @@ export function AppHeader() {
                 {profile?.display_name ?? user.email}
               </Link>
               <button
-                onClick={() => signOut()}
+                onClick={handleSignOut}
                 className="inline-flex h-8 items-center gap-1 rounded-full border border-border px-3 text-xs font-medium hover:bg-muted"
               >
                 <LogOut className="h-3 w-3" /> Sign out
@@ -154,7 +158,7 @@ export function AppHeader() {
                     <span className="inline-flex items-center gap-1.5"><UserCircle className="h-3.5 w-3.5" /> My account</span>
                   </Link>
                   <button
-                    onClick={() => signOut()}
+                    onClick={handleSignOut}
                     className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                   >
                     Sign out ({profile?.display_name ?? user.email})
